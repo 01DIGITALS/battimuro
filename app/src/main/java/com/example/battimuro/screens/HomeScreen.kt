@@ -29,7 +29,15 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     onStartGame: (GameMode, Difficulty, Boolean) -> Unit
 ) {
-    val CURRENT_VERSION = "v0.9"
+    val context = LocalContext.current
+    val CURRENT_VERSION = remember {
+        try {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            "v${packageInfo.versionName}"
+        } catch (e: Exception) {
+            "v0.9"
+        }
+    }
     
     var gameMode by remember { mutableStateOf(GameMode.ONE_VS_CPU) }
     var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
@@ -42,7 +50,6 @@ fun HomeScreen(
     var updateUrl by remember { mutableStateOf("") }
     var isCheckingUpdate by remember { mutableStateOf(false) }
     
-    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
 
