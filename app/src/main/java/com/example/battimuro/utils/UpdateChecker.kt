@@ -32,10 +32,24 @@ object UpdateChecker {
                     reader.close()
 
                     val json = JSONObject(response.toString())
-                    val tagName = json.getString("tag_name") // e.g., "v1.1"
-                    val htmlUrl = json.getString("html_url") // Link to release page
+                    val tagName = json.getString("tag_name")
                     
-                    return@withContext Pair(tagName, htmlUrl)
+                    var downloadUrl = json.getString("html_url") // Default fallback
+                    
+                    // Parse assets to find the APK
+                    if (json.has("assets")) {
+                        val assets = json.getJSONArray("assets")
+                        for (i in 0 until assets.length()) {
+                            val asset = assets.getJSONObject(i)
+                            val name = asset.getString("name")
+                            if (name.endsWith(".apk", ignoreCase = true)) {
+                                downloadUrl = asset.getString("browser_download_url")
+                                break
+                            }
+                        }
+                    }
+                    
+                    return@withContext Pair(tagName, downloadUrl)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
