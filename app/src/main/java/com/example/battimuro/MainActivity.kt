@@ -16,6 +16,7 @@ import com.example.battimuro.ui.theme.BattimuroTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Handle Splash Screen transition
+        Thread.sleep(2000) // Keep splash screen for 2 seconds
         setTheme(R.style.Theme_Battimuro)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

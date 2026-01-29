@@ -71,13 +71,15 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(onClick = { 
                     try {
-                        uriHandler.openUri(updateUrl)
+                       // Direct download and install flow
+                       com.example.battimuro.utils.UpdateDownloader.downloadAndInstall(context, updateUrl, "battimuro_update.apk")
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        android.widget.Toast.makeText(context, "Errore: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                     }
                     showUpdateDialog = false 
                 }) {
-                    Text("Scarica")
+                    Text("Scarica & Installa")
                 }
             },
             dismissButton = {

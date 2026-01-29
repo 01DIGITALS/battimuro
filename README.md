@@ -1,51 +1,51 @@
 # Battimuro - Neon Landscape Edition
 
-**Battimuro** is a modern reimagining of the classic Pong arcade game, built for Android 10+ using **Jetpack Compose**. It features a futuristic neon aesthetic, landscape-first gameplay, and multiple game modes.
+**Battimuro** è una rivisitazione moderna del classico gioco arcade Pong, realizzato per Android 10+ utilizzando **Jetpack Compose**. Presenta un'estetica neon futuristica, gameplay in modalità landscape e diverse modalità di gioco.
 
-## ✨ Features
+## ✨ Funzionalità
 
-- **Neon Aesthetic**: Vibrant colors, dark background, and glowing effects.
-- **Landscape Gameplay**: Vertical paddles on the left and right sides on a horizontal field.
-- **Game Modes**:
-  - **1 vs CPU**: Challenge an AI opponent with 3 difficulty levels (Easy, Medium, Hard).
-  - **1 vs 1**: Local multiplayer on the same device with multi-touch support.
-- **Dynamic Scoring**: Real-time score updates displayed in the background.
-- **Update System**: Integrated check for new versions via GitHub Releases.
-- **Localization**: Fully localized in Italian 🇮🇹.
+- **Estetica Neon**: Colori vivaci (Ciano, Magenta, Verde), sfondo scuro ed effetti luminosi.
+- **Gameplay Landscape**: Palette verticali sui lati sinistro e destro in un campo orizzontale.
+- **Modalità di Gioco**:
+  - **1 vs CPU**: Sfida un avversario AI con 3 livelli di difficoltà (Facile, Medio, Difficile).
+  - **1 vs 1**: Multiplayer locale sullo stesso dispositivo con supporto multi-touch.
+- **Punteggio Dinamico**: Aggiornamenti del punteggio in tempo reale visualizzati sullo sfondo.
+- **Sistema di Aggiornamento**: Controllo integrato delle nuove versioni tramite le Release di GitHub.
+- **Localizzazione**: Completamente tradotto in Italiano 🇮🇹.
 
-## 📱 Screenshots
+## 📱 Screenshot
 
-*(Add screenshots here)*
+*(Aggiungi screenshot qui)*
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Tecnologico
 
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose (Material3)
-- **Minimum SDK**: 29 (Android 10)
-- **Target SDK**: 36
-- **Architecture**: MVVM-like state hoisting with `GameEngine` logic separated from UI.
+- **Linguaggio**: Kotlin
+- **Framework UI**: Jetpack Compose (Material3)
+- **SDK Minimo**: 29 (Android 10)
+- **SDK Target**: 36
+- **Architettura**: State hoisting simil-MVVM con logica `GameEngine` separata dalla UI.
 
-## 🚀 Installation
+## 🚀 Installazione
 
-1. Go to the [Releases](https://github.com/01DIGITALS/battimuro/releases) page.
-2. Download the latest `app-release.apk`.
-3. Install the APK on your Android device (ensure "Install from unknown sources" is enabled).
+1. Vai alla pagina [Releases](https://github.com/01DIGITALS/battimuro/releases).
+2. Scarica l'ultimo file `app-release.apk`.
+3. Installa l'APK sul tuo dispositivo Android (assicurati che l'installazione da origini sconosciute sia abilitata).
 
-## 👨‍💻 Development
+## 👨‍💻 Sviluppo
 
-1. Clone the repository:
+1. Clona il repository:
    ```bash
    git clone https://github.com/01DIGITALS/battimuro.git
    ```
-2. Open in **Android Studio**.
-3. Sync Gradle project.
-4. Run on an emulator or physical device.
+2. Apri in **Android Studio**.
+3. Sincronizza il progetto Gradle.
+4. Esegui su un emulatore o dispositivo fisico.
 
-## 📦 Versioning
+## 📦 Versionamento
 
-We use [GitHub Releases](https://github.com/01DIGITALS/battimuro/releases) for strict versioning.
-- **Current Version**: v0.9 (Stable)
+Utilizziamo [GitHub Releases](https://github.com/01DIGITALS/battimuro/releases) per il versionamento rigoroso.
+- **Versione Corrente**: v0.9 (Stabile)
 
-## 👤 Author
+## 👤 Autore
 
 **Louis Sanges**
