@@ -3,10 +3,6 @@
     <!-- Background Color -->
     <item android:drawable="@color/black" />
     
-    <!-- Logo Centered -->
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/splash_battimuro" />
-    </item>
+    <!-- Logo/Image Filling Screen -->
+    <item android:drawable="@drawable/splash_battimuro" />
 </layer-list>

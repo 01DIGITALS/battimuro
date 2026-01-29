@@ -9,9 +9,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/battimuro_icona"
+        android:icon="@drawable/battimuro_icona"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/battimuro_icona"
+        android:roundIcon="@drawable/battimuro_icona"
         android:supportsRtl="true"
         android:theme="@style/Theme.Battimuro">
         
