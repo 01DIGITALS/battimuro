@@ -18,7 +18,7 @@ object UpdateDownloader {
             .setTitle("Battimuro Update")
             .setDescription("Downloading new version...")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+            .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, fileName)
             .setAllowedOverMetered(true)
             .setAllowedOverRoaming(true)
 
@@ -33,7 +33,11 @@ object UpdateDownloader {
                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
                     installApk(ctxt, fileName)
-                    ctxt.unregisterReceiver(this)
+                    try {
+                        ctxt.unregisterReceiver(this)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -42,8 +46,7 @@ object UpdateDownloader {
 
     private fun installApk(context: Context, fileName: String) {
         try {
-            val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            val file = File(path, fileName)
+            val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
             
             if (file.exists()) {
                 val uri = FileProvider.getUriForFile(
