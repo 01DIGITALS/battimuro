@@ -15,31 +15,74 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import android.widget.Toast
 import com.example.battimuro.game.Difficulty
 import com.example.battimuro.game.GameMode
 import com.example.battimuro.ui.theme.NeonCyan
 import com.example.battimuro.ui.theme.NeonGreen
 import com.example.battimuro.ui.theme.NeonMagenta
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
     onStartGame: (GameMode, Difficulty, Boolean) -> Unit
 ) {
+    val CURRENT_VERSION = "v0.9"
+    
     var gameMode by remember { mutableStateOf(GameMode.ONE_VS_CPU) }
     var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
     var playerIsLeft by remember { mutableStateOf(true) }
     var showAbout by remember { mutableStateOf(false) }
+    
+    // Update States
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var newVersionName by remember { mutableStateOf("") }
+    var updateUrl by remember { mutableStateOf("") }
+    var isCheckingUpdate by remember { mutableStateOf(false) }
+    
+    val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val scope = rememberCoroutineScope()
 
     if (showAbout) {
         AlertDialog(
             onDismissRequest = { showAbout = false },
             title = { Text("Info su Battimuro") },
             text = { 
-                Text("Versione: 0.9 stable\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.") 
+                Text("Versione: $CURRENT_VERSION\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.") 
             },
             confirmButton = {
                 TextButton(onClick = { showAbout = false }) {
                     Text("Chiudi")
+                }
+            }
+        )
+    }
+
+    if (showUpdateDialog) {
+        AlertDialog(
+            onDismissRequest = { showUpdateDialog = false },
+            title = { Text("Aggiornamento Disponibile") },
+            text = { 
+                Text("È disponibile una nuova versione: $newVersionName\nScaricare ora?") 
+            },
+            confirmButton = {
+                TextButton(onClick = { 
+                    try {
+                        uriHandler.openUri(updateUrl)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    showUpdateDialog = false 
+                }) {
+                    Text("Scarica")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUpdateDialog = false }) {
+                    Text("Più tardi")
                 }
             }
         )
@@ -95,8 +138,31 @@ fun HomeScreen(
                 TextButton(onClick = { showAbout = true }) {
                     Text("Info", color = Color.LightGray)
                 }
-                TextButton(onClick = { /* Placeholder */ }) {
-                    Text("Aggiornamenti", color = Color.LightGray)
+                TextButton(
+                    onClick = { 
+                        if (!isCheckingUpdate) {
+                            isCheckingUpdate = true
+                            scope.launch {
+                                val result = com.example.battimuro.utils.UpdateChecker.checkForUpdate()
+                                isCheckingUpdate = false
+                                if (result != null) {
+                                    val (tag, url) = result
+                                    // Simple check: if tag from github is different from current
+                                    if (tag != CURRENT_VERSION) {
+                                        newVersionName = tag
+                                        updateUrl = url
+                                        showUpdateDialog = true
+                                    } else {
+                                        Toast.makeText(context, "Hai già l'ultima versione!", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    Toast.makeText(context, "Umm, errore nel controllo aggiornamenti.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Text(if (isCheckingUpdate) "Controllo..." else "Aggiornamenti", color = Color.LightGray)
                 }
             }
         }
