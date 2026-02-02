@@ -213,7 +213,7 @@ fun HomeScreen(
             if (gameMode == GameMode.ONE_VS_CPU) {
                 Text("DIFFICOLTÀ", color = Color.Gray, fontSize = 12.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Difficulty.values().forEach { diff ->
+                    Difficulty.entries.forEach { diff ->
                         val label = when(diff) {
                             Difficulty.EASY -> "FACILE"
                             Difficulty.MEDIUM -> "MEDIO"

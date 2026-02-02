@@ -49,11 +49,16 @@ fun GameScreen(
             GameEngine(width, height, gameMode, difficulty, playerIsLeft).apply { start() }
         }
 
-        // Game Loop
+        // Game Loop with proper delta time
         LaunchedEffect(Unit) {
+            var lastFrameTime = 0L
             while (true) {
-                withFrameNanos { 
-                    gameEngine.update(16) 
+                withFrameNanos { frameTimeNanos ->
+                    if (lastFrameTime != 0L) {
+                        val deltaMs = (frameTimeNanos - lastFrameTime) / 1_000_000
+                        gameEngine.update(deltaMs)
+                    }
+                    lastFrameTime = frameTimeNanos
                 }
             }
         }

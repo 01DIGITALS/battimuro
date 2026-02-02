@@ -5,16 +5,14 @@ plugins {
 
 android {
     namespace = "com.example.battimuro"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.battimuro"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.9"
+        versionCode = 3
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
