@@ -58,7 +58,7 @@ fun HomeScreen(
             onDismissRequest = { showAbout = false },
             title = { Text("Info su Battimuro") },
             text = { 
-                Text("Versione: $CURRENT_VERSION\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.") 
+                Text("Versione: $CURRENT_VERSION\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.\n\nNota: Questa versione è distribuita gratuitamente perché è in fase di test (anche se stabile), per capire se piace e se è il caso di proseguire con lo sviluppo.") 
             },
             confirmButton = {
                 TextButton(onClick = { showAbout = false }) {
