@@ -16,6 +16,7 @@ import io.github.digitals01.battimuro.billing.BillingManager
 import io.github.digitals01.battimuro.billing.BillingManagerFactory
 import io.github.digitals01.battimuro.billing.PurchaseRepository
 import io.github.digitals01.battimuro.game.BallStyle
+import io.github.digitals01.battimuro.game.GameLevel
 import io.github.digitals01.battimuro.game.PaddleStyle
 import io.github.digitals01.battimuro.screens.GameScreen
 import io.github.digitals01.battimuro.screens.HomeScreen
@@ -40,6 +41,9 @@ class MainActivity : ComponentActivity() {
                 if (success && productId == "style_pack") {
                     purchaseRepository.setStylePackPurchased(true)
                 }
+                if (success && productId == "levels_pack") {
+                    purchaseRepository.setLevelsPackPurchased(true)
+                }
             }
 
             override fun onPurchaseError(message: String) {}
@@ -63,6 +67,9 @@ class MainActivity : ComponentActivity() {
                             purchaseRepository = purchaseRepository,
                             onPurchaseStylePack = {
                                 billingManager.purchaseStylePack(this@MainActivity)
+                            },
+                            onPurchaseLevelsPack = {
+                                billingManager.purchaseLevelsPack(this@MainActivity)
                             },
                             onPurchaseDonation = {
                                 billingManager.purchaseDonation(this@MainActivity)
@@ -91,9 +98,11 @@ enum class Screen {
 fun BattimuroApp(
     purchaseRepository: PurchaseRepository,
     onPurchaseStylePack: () -> Unit,
+    onPurchaseLevelsPack: () -> Unit,
     onPurchaseDonation: () -> Unit
 ) {
     val isStylePackOwned by purchaseRepository.stylePackOwned.collectAsState()
+    val isLevelsPackOwned by purchaseRepository.levelsPackOwned.collectAsState()
 
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
 
@@ -102,16 +111,19 @@ fun BattimuroApp(
     var playerIsLeft by remember { mutableStateOf(true) }
     var ballStyle by remember { mutableStateOf(BallStyle.NEON) }
     var paddleStyle by remember { mutableStateOf(PaddleStyle.NEON) }
+    var gameLevel by remember { mutableStateOf(GameLevel.NONE) }
 
     when (currentScreen) {
         Screen.HOME -> {
             HomeScreen(
-                onStartGame = { mode, diff, isLeft ->
+                onStartGame = { mode, diff, isLeft, level ->
                     gameMode = mode
                     difficulty = diff
                     playerIsLeft = isLeft
+                    gameLevel = level
                     currentScreen = Screen.GAME
                 },
+                isLevelsPackOwned = isLevelsPackOwned,
                 onOpenOptions = {
                     currentScreen = Screen.OPTIONS
                 },
@@ -141,7 +153,9 @@ fun BattimuroApp(
         Screen.SHOP -> {
             ShopScreen(
                 isStylePackOwned = isStylePackOwned,
+                isLevelsPackOwned = isLevelsPackOwned,
                 onPurchaseStylePack = onPurchaseStylePack,
+                onPurchaseLevelsPack = onPurchaseLevelsPack,
                 onPurchaseDonation = onPurchaseDonation,
                 onBack = { currentScreen = Screen.HOME }
             )
@@ -153,6 +167,7 @@ fun BattimuroApp(
                 playerIsLeft = playerIsLeft,
                 ballStyle = ballStyle,
                 paddleStyle = paddleStyle,
+                gameLevel = gameLevel,
                 onGameOver = {
                     currentScreen = Screen.HOME
                 },

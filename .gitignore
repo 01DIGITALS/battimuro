@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+agconnect-services.json
+google-services.json

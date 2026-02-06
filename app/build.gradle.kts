@@ -73,4 +73,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     "googlePlayImplementation"(libs.google.play.billing)
     "huaweiImplementation"(libs.huawei.iap)
+    "huaweiImplementation"(libs.huawei.agconnect.core)
 }

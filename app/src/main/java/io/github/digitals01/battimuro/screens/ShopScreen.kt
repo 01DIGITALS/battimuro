@@ -25,7 +25,9 @@ import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 @Composable
 fun ShopScreen(
     isStylePackOwned: Boolean,
+    isLevelsPackOwned: Boolean,
     onPurchaseStylePack: () -> Unit,
+    onPurchaseLevelsPack: () -> Unit,
     onPurchaseDonation: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -61,9 +63,8 @@ fun ShopScreen(
             title = "PACCHETTO LIVELLI",
             description = "5 livelli a difficolt\u00e0 crescente con ostacoli nel campo di gioco che deflettono la pallina.",
             price = "0,99 \u20AC",
-            isPurchased = false,
-            isComingSoon = true,
-            onPurchase = {},
+            isPurchased = isLevelsPackOwned,
+            onPurchase = onPurchaseLevelsPack,
             accentColor = NeonCyan
         )
 

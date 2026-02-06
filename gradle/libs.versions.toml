@@ -10,10 +10,12 @@ kotlin = "2.0.21"
 composeBom = "2024.09.00"
 playBilling = "7.1.1"
 huaweiIap = "6.13.0.300"
+agconnect = "1.9.1.301"
 
 [libraries]
 google-play-billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
 huawei-iap = { group = "com.huawei.hms", name = "iap", version.ref = "huaweiIap" }
+huawei-agconnect-core = { group = "com.huawei.agconnect", name = "agconnect-core", version.ref = "agconnect" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

@@ -24,6 +24,11 @@ class HuaweiBillingManager(
         listener?.onPurchaseError("Huawei IAP not yet implemented")
     }
 
+    override fun purchaseLevelsPack(activity: Activity) {
+        Toast.makeText(activity, "Acquisti non ancora disponibili su questo store", Toast.LENGTH_SHORT).show()
+        listener?.onPurchaseError("Huawei IAP not yet implemented")
+    }
+
     override fun purchaseDonation(activity: Activity) {
         Toast.makeText(activity, "Acquisti non ancora disponibili su questo store", Toast.LENGTH_SHORT).show()
         listener?.onPurchaseError("Huawei IAP not yet implemented")

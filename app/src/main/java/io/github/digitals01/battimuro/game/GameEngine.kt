@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.sin
 import kotlin.random.Random
 
 data class Ball(
@@ -69,7 +71,8 @@ class GameEngine(
     private val height: Float,
     val gameMode: GameMode,
     val difficulty: Difficulty = Difficulty.MEDIUM,
-    val playerIsLeft: Boolean = true
+    val playerIsLeft: Boolean = true,
+    val gameLevel: GameLevel = GameLevel.NONE
 ) {
     var playerScore by mutableStateOf(0)
         private set
@@ -86,6 +89,9 @@ class GameEngine(
     private val maxTrailSize = 12
 
     var gameTimeMs by mutableStateOf(0L)
+        private set
+
+    var obstacles by mutableStateOf(createObstacles())
         private set
 
     val paddleWidth = 40f
@@ -154,6 +160,9 @@ class GameEngine(
             )
         }
 
+        updateObstacles()
+        checkObstacleCollisions()
+
         checkPaddleCollision(leftPaddle)
         checkPaddleCollision(rightPaddle)
 
@@ -218,6 +227,90 @@ class GameEngine(
             rightPaddle = rightPaddle.copy(position = newPos)
         } else {
             leftPaddle = leftPaddle.copy(position = newPos)
+        }
+    }
+
+    private fun createObstacles(): List<Obstacle> {
+        return gameLevel.obstacles.map { def ->
+            val pixelWidth = def.width * width
+            val pixelHeight = def.height * height
+            val pixelX = def.centerX * width - pixelWidth / 2
+            val pixelY = def.centerY * height - pixelHeight / 2
+            Obstacle(
+                position = Offset(pixelX, pixelY),
+                size = Size(pixelWidth, pixelHeight),
+                movement = def.movement,
+                speed = def.speed,
+                range = when (def.movement) {
+                    ObstacleMovement.VERTICAL -> def.range * height
+                    ObstacleMovement.HORIZONTAL -> def.range * width
+                    ObstacleMovement.NONE -> 0f
+                },
+                anchorPosition = Offset(pixelX + pixelWidth / 2, pixelY + pixelHeight / 2)
+            )
+        }
+    }
+
+    private fun updateObstacles() {
+        obstacles = obstacles.map { obstacle ->
+            when (obstacle.movement) {
+                ObstacleMovement.NONE -> obstacle
+                ObstacleMovement.VERTICAL -> {
+                    val offsetY = sin(gameTimeMs.toDouble() * obstacle.speed) * obstacle.range
+                    val newY = (obstacle.anchorPosition.y + offsetY.toFloat() - obstacle.size.height / 2)
+                        .coerceIn(0f, height - obstacle.size.height)
+                    obstacle.copy(position = Offset(obstacle.position.x, newY))
+                }
+                ObstacleMovement.HORIZONTAL -> {
+                    val offsetX = sin(gameTimeMs.toDouble() * obstacle.speed) * obstacle.range
+                    val newX = (obstacle.anchorPosition.x + offsetX.toFloat() - obstacle.size.width / 2)
+                        .coerceIn(0f, width - obstacle.size.width)
+                    obstacle.copy(position = Offset(newX, obstacle.position.y))
+                }
+            }
+        }
+    }
+
+    private fun checkObstacleCollisions() {
+        val ballRect = androidx.compose.ui.geometry.Rect(
+            ball.position.x - ball.radius,
+            ball.position.y - ball.radius,
+            ball.position.x + ball.radius,
+            ball.position.y + ball.radius
+        )
+
+        for (obstacle in obstacles) {
+            val obstacleRect = androidx.compose.ui.geometry.Rect(
+                obstacle.position,
+                obstacle.size
+            )
+
+            if (ballRect.overlaps(obstacleRect)) {
+                val overlapLeft = (ball.position.x + ball.radius) - obstacle.position.x
+                val overlapRight = (obstacle.position.x + obstacle.size.width) - (ball.position.x - ball.radius)
+                val overlapTop = (ball.position.y + ball.radius) - obstacle.position.y
+                val overlapBottom = (obstacle.position.y + obstacle.size.height) - (ball.position.y - ball.radius)
+
+                val minOverlapX = min(overlapLeft, overlapRight)
+                val minOverlapY = min(overlapTop, overlapBottom)
+
+                if (minOverlapX < minOverlapY) {
+                    ball = ball.copy(velocity = ball.velocity.copy(x = -ball.velocity.x))
+                    if (overlapLeft < overlapRight) {
+                        ball = ball.copy(position = ball.position.copy(x = obstacle.position.x - ball.radius))
+                    } else {
+                        ball = ball.copy(position = ball.position.copy(x = obstacle.position.x + obstacle.size.width + ball.radius))
+                    }
+                } else {
+                    ball = ball.copy(velocity = ball.velocity.copy(y = -ball.velocity.y))
+                    if (overlapTop < overlapBottom) {
+                        ball = ball.copy(position = ball.position.copy(y = obstacle.position.y - ball.radius))
+                    } else {
+                        ball = ball.copy(position = ball.position.copy(y = obstacle.position.y + obstacle.size.height + ball.radius))
+                    }
+                }
+                break
+            }
         }
     }
 

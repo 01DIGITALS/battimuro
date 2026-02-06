@@ -18,10 +18,12 @@ import androidx.compose.material.icons.filled.Menu
 import io.github.digitals01.battimuro.game.BallStyle
 import io.github.digitals01.battimuro.game.Difficulty
 import io.github.digitals01.battimuro.game.GameEngine
+import io.github.digitals01.battimuro.game.GameLevel
 import io.github.digitals01.battimuro.game.GameMode
 import io.github.digitals01.battimuro.game.GameStatus
 import io.github.digitals01.battimuro.game.PaddleStyle
 import io.github.digitals01.battimuro.rendering.drawBall
+import io.github.digitals01.battimuro.rendering.drawObstacles
 import io.github.digitals01.battimuro.rendering.drawPaddle
 import io.github.digitals01.battimuro.ui.theme.DarkBackground
 import io.github.digitals01.battimuro.ui.theme.NeonGreen
@@ -33,6 +35,7 @@ fun GameScreen(
     playerIsLeft: Boolean,
     ballStyle: BallStyle,
     paddleStyle: PaddleStyle,
+    gameLevel: GameLevel = GameLevel.NONE,
     onGameOver: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -61,7 +64,7 @@ fun GameScreen(
         val height = maxHeight.value * density
 
         val gameEngine = remember(width, height) {
-            GameEngine(width, height, gameMode, difficulty, playerIsLeft).apply { start() }
+            GameEngine(width, height, gameMode, difficulty, playerIsLeft, gameLevel).apply { start() }
         }
 
         LaunchedEffect(Unit) {
@@ -105,6 +108,11 @@ fun GameScreen(
                 leftPaddle = gameEngine.leftPaddle,
                 rightPaddle = gameEngine.rightPaddle,
                 style = paddleStyle,
+                gameTimeMs = gameEngine.gameTimeMs
+            )
+
+            drawObstacles(
+                obstacles = gameEngine.obstacles,
                 gameTimeMs = gameEngine.gameTimeMs
             )
         }

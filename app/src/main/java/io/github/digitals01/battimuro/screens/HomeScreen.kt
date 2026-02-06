@@ -15,15 +15,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import io.github.digitals01.battimuro.game.Difficulty
+import io.github.digitals01.battimuro.game.GameLevel
 import io.github.digitals01.battimuro.game.GameMode
 import io.github.digitals01.battimuro.ui.theme.NeonCyan
 import io.github.digitals01.battimuro.ui.theme.NeonGreen
 import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 fun HomeScreen(
-    onStartGame: (GameMode, Difficulty, Boolean) -> Unit,
+    onStartGame: (GameMode, Difficulty, Boolean, GameLevel) -> Unit,
+    isLevelsPackOwned: Boolean = false,
     onOpenOptions: () -> Unit,
     onOpenShop: () -> Unit
 ) {
@@ -40,6 +45,7 @@ fun HomeScreen(
     var gameMode by remember { mutableStateOf(GameMode.ONE_VS_CPU) }
     var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
     var playerIsLeft by remember { mutableStateOf(true) }
+    var selectedLevel by remember { mutableStateOf(GameLevel.NONE) }
     var showAbout by remember { mutableStateOf(false) }
 
     if (showAbout) {
@@ -93,7 +99,7 @@ fun HomeScreen(
             )
 
             Button(
-                onClick = { onStartGame(gameMode, difficulty, playerIsLeft) },
+                onClick = { onStartGame(gameMode, difficulty, playerIsLeft, selectedLevel) },
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth(0.8f).height(56.dp)
             ) {
@@ -178,6 +184,33 @@ fun HomeScreen(
                     onClick = { playerIsLeft = false },
                     label = { Text("DESTRA") }
                 )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("LIVELLO", color = Color.Gray, fontSize = 12.sp)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                GameLevel.entries.forEach { level ->
+                    val enabled = level == GameLevel.NONE || isLevelsPackOwned
+                    FilterChip(
+                        selected = selectedLevel == level,
+                        onClick = { if (enabled) selectedLevel = level },
+                        enabled = enabled,
+                        label = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (level != GameLevel.NONE && !isLevelsPackOwned) {
+                                    Icon(
+                                        Icons.Filled.Lock,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                }
+                                Text(level.displayName)
+                            }
+                        }
+                    )
+                }
             }
         }
     }

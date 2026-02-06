@@ -9,6 +9,7 @@ class PurchaseRepository(context: Context) {
     companion object {
         private const val PREFS_NAME = "battimuro_purchases"
         private const val KEY_STYLE_PACK = "style_pack_purchased"
+        private const val KEY_LEVELS_PACK = "levels_pack_purchased"
     }
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -22,4 +23,14 @@ class PurchaseRepository(context: Context) {
     }
 
     fun isStylePackPurchased(): Boolean = _stylePackOwned.value
+
+    private val _levelsPackOwned = MutableStateFlow(prefs.getBoolean(KEY_LEVELS_PACK, false))
+    val levelsPackOwned: StateFlow<Boolean> = _levelsPackOwned.asStateFlow()
+
+    fun setLevelsPackPurchased(purchased: Boolean) {
+        prefs.edit().putBoolean(KEY_LEVELS_PACK, purchased).apply()
+        _levelsPackOwned.value = purchased
+    }
+
+    fun isLevelsPackPurchased(): Boolean = _levelsPackOwned.value
 }
