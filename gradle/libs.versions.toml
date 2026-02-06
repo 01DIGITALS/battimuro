@@ -8,8 +8,12 @@ lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 kotlin = "2.0.21"
 composeBom = "2024.09.00"
+playBilling = "7.1.1"
+huaweiIap = "6.13.0.300"
 
 [libraries]
+google-play-billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
+huawei-iap = { group = "com.huawei.hms", name = "iap", version.ref = "huaweiIap" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

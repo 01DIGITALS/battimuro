@@ -38,16 +38,30 @@ enum class Difficulty(val speedFactor: Float, val reactionError: Float) {
     HARD(1.2f, 0.0f)
 }
 
-enum class BallStyle {
+enum class BallStyle(val isPremium: Boolean = false) {
     NEON,
     MINIMAL,
-    FLAME
+    FLAME,
+    PULSE(isPremium = true),
+    PRISMA(isPremium = true),
+    GHOST(isPremium = true),
+    PIXEL(isPremium = true),
+    PLASMA(isPremium = true),
+    ICE(isPremium = true),
+    GOLD(isPremium = true)
 }
 
-enum class PaddleStyle {
+enum class PaddleStyle(val isPremium: Boolean = false) {
     NEON,
     MINIMAL,
-    SOLID
+    SOLID,
+    PULSE(isPremium = true),
+    PRISMA(isPremium = true),
+    GHOST(isPremium = true),
+    PIXEL(isPremium = true),
+    PLASMA(isPremium = true),
+    ICE(isPremium = true),
+    GOLD(isPremium = true)
 }
 
 class GameEngine(
@@ -69,7 +83,10 @@ class GameEngine(
 
     var ballTrail by mutableStateOf(listOf<Offset>())
         private set
-    private val maxTrailSize = 8
+    private val maxTrailSize = 12
+
+    var gameTimeMs by mutableStateOf(0L)
+        private set
 
     val paddleWidth = 40f
     val paddleHeight = 200f
@@ -118,6 +135,7 @@ class GameEngine(
     fun update(deltaTime: Long) {
         if (status != GameStatus.PLAYING) return
 
+        gameTimeMs += deltaTime
         ballTrail = (ballTrail + ball.position).takeLast(maxTrailSize)
 
         val nextPos = ball.position + ball.velocity

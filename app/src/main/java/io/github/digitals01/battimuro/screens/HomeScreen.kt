@@ -24,7 +24,8 @@ import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 @Composable
 fun HomeScreen(
     onStartGame: (GameMode, Difficulty, Boolean) -> Unit,
-    onOpenOptions: () -> Unit
+    onOpenOptions: () -> Unit,
+    onOpenShop: () -> Unit
 ) {
     val context = LocalContext.current
     val currentVersion = remember {
@@ -46,7 +47,9 @@ fun HomeScreen(
             onDismissRequest = { showAbout = false },
             title = { Text("Info su Battimuro") },
             text = {
-                Text("Versione: $currentVersion\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.\n\nNota: Questa versione è distribuita gratuitamente perché è in fase di test (anche se stabile), per capire se piace e se è il caso di proseguire con lo sviluppo.")
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text("Versione: $currentVersion\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.\n\nNota: Questa versione \u00e8 distribuita gratuitamente perch\u00e9 \u00e8 in fase di test (anche se stabile), per capire se piace e se \u00e8 il caso di proseguire con lo sviluppo.")
+                }
             },
             confirmButton = {
                 TextButton(onClick = { showAbout = false }) {
@@ -102,6 +105,9 @@ fun HomeScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 TextButton(onClick = onOpenOptions) {
                     Text("Opzioni", color = Color.LightGray)
+                }
+                TextButton(onClick = onOpenShop) {
+                    Text("Negozio", color = Color.LightGray)
                 }
                 TextButton(onClick = { showAbout = true }) {
                     Text("Info", color = Color.LightGray)

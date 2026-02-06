@@ -9,10 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
@@ -23,12 +21,10 @@ import io.github.digitals01.battimuro.game.GameEngine
 import io.github.digitals01.battimuro.game.GameMode
 import io.github.digitals01.battimuro.game.GameStatus
 import io.github.digitals01.battimuro.game.PaddleStyle
+import io.github.digitals01.battimuro.rendering.drawBall
+import io.github.digitals01.battimuro.rendering.drawPaddle
 import io.github.digitals01.battimuro.ui.theme.DarkBackground
-import io.github.digitals01.battimuro.ui.theme.NeonCyan
 import io.github.digitals01.battimuro.ui.theme.NeonGreen
-import io.github.digitals01.battimuro.ui.theme.NeonMagenta
-import io.github.digitals01.battimuro.ui.theme.NeonOrange
-import io.github.digitals01.battimuro.ui.theme.NeonRed
 
 @Composable
 fun GameScreen(
@@ -98,94 +94,19 @@ fun GameScreen(
                 pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(20f, 20f))
             )
 
-            // Ball rendering
-            when (ballStyle) {
-                BallStyle.NEON -> {
-                    drawCircle(
-                        color = NeonGreen.copy(alpha = 0.3f),
-                        radius = gameEngine.ball.radius * 2,
-                        center = gameEngine.ball.position
-                    )
-                    drawCircle(
-                        color = NeonGreen,
-                        radius = gameEngine.ball.radius,
-                        center = gameEngine.ball.position
-                    )
-                }
-                BallStyle.MINIMAL -> {
-                    drawCircle(
-                        color = Color.White,
-                        radius = gameEngine.ball.radius,
-                        center = gameEngine.ball.position,
-                        style = Stroke(width = 2f)
-                    )
-                }
-                BallStyle.FLAME -> {
-                    val trail = gameEngine.ballTrail
-                    trail.forEachIndexed { index, pos ->
-                        val progress = (index + 1).toFloat() / (trail.size + 1)
-                        val trailRadius = gameEngine.ball.radius * progress * 0.8f
-                        val trailColor = androidx.compose.ui.graphics.lerp(NeonRed, NeonOrange, progress)
-                        drawCircle(
-                            color = trailColor.copy(alpha = progress * 0.5f),
-                            radius = trailRadius,
-                            center = pos
-                        )
-                    }
-                    drawCircle(
-                        color = NeonOrange.copy(alpha = 0.4f),
-                        radius = gameEngine.ball.radius * 1.8f,
-                        center = gameEngine.ball.position
-                    )
-                    drawCircle(
-                        color = NeonGreen,
-                        radius = gameEngine.ball.radius,
-                        center = gameEngine.ball.position
-                    )
-                }
-            }
+            drawBall(
+                ball = gameEngine.ball,
+                style = ballStyle,
+                trail = gameEngine.ballTrail,
+                gameTimeMs = gameEngine.gameTimeMs
+            )
 
-            // Paddle rendering
-            when (paddleStyle) {
-                PaddleStyle.NEON -> {
-                    drawRect(
-                        brush = Brush.verticalGradient(listOf(NeonCyan, NeonMagenta)),
-                        topLeft = gameEngine.leftPaddle.position,
-                        size = gameEngine.leftPaddle.size
-                    )
-                    drawRect(
-                        brush = Brush.verticalGradient(listOf(NeonMagenta, NeonCyan)),
-                        topLeft = gameEngine.rightPaddle.position,
-                        size = gameEngine.rightPaddle.size
-                    )
-                }
-                PaddleStyle.MINIMAL -> {
-                    drawRect(
-                        color = Color.White,
-                        topLeft = gameEngine.leftPaddle.position,
-                        size = gameEngine.leftPaddle.size,
-                        style = Stroke(width = 2f)
-                    )
-                    drawRect(
-                        color = Color.White,
-                        topLeft = gameEngine.rightPaddle.position,
-                        size = gameEngine.rightPaddle.size,
-                        style = Stroke(width = 2f)
-                    )
-                }
-                PaddleStyle.SOLID -> {
-                    drawRect(
-                        color = NeonCyan,
-                        topLeft = gameEngine.leftPaddle.position,
-                        size = gameEngine.leftPaddle.size
-                    )
-                    drawRect(
-                        color = NeonMagenta,
-                        topLeft = gameEngine.rightPaddle.position,
-                        size = gameEngine.rightPaddle.size
-                    )
-                }
-            }
+            drawPaddle(
+                leftPaddle = gameEngine.leftPaddle,
+                rightPaddle = gameEngine.rightPaddle,
+                style = paddleStyle,
+                gameTimeMs = gameEngine.gameTimeMs
+            )
         }
 
         Row(Modifier.fillMaxSize()) {

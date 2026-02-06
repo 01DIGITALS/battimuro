@@ -2,6 +2,10 @@ package io.github.digitals01.battimuro.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,67 +19,96 @@ import io.github.digitals01.battimuro.game.PaddleStyle
 import io.github.digitals01.battimuro.ui.theme.NeonCyan
 import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OptionsScreen(
     ballStyle: BallStyle,
     paddleStyle: PaddleStyle,
     onBallStyleChange: (BallStyle) -> Unit,
     onPaddleStyleChange: (PaddleStyle) -> Unit,
+    isStylePackOwned: Boolean,
     onBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             text = "OPZIONI",
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
             color = NeonCyan,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 24.dp)
         )
 
         Text("STILE PALLINA", color = Color.Gray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             BallStyle.entries.forEach { style ->
-                val label = when (style) {
-                    BallStyle.NEON -> "NEON"
-                    BallStyle.MINIMAL -> "MINIMAL"
-                    BallStyle.FLAME -> "FIAMMA"
-                }
+                val label = ballStyleLabel(style)
+                val enabled = !style.isPremium || isStylePackOwned
                 FilterChip(
                     selected = ballStyle == style,
-                    onClick = { onBallStyleChange(style) },
-                    label = { Text(label) }
+                    onClick = { if (enabled) onBallStyleChange(style) },
+                    enabled = enabled,
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (style.isPremium && !isStylePackOwned) {
+                                Icon(
+                                    Icons.Filled.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                            }
+                            Text(label)
+                        }
+                    }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text("STILE RESPINGENTI", color = Color.Gray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             PaddleStyle.entries.forEach { style ->
-                val label = when (style) {
-                    PaddleStyle.NEON -> "NEON"
-                    PaddleStyle.MINIMAL -> "MINIMAL"
-                    PaddleStyle.SOLID -> "SOLIDO"
-                }
+                val label = paddleStyleLabel(style)
+                val enabled = !style.isPremium || isStylePackOwned
                 FilterChip(
                     selected = paddleStyle == style,
-                    onClick = { onPaddleStyleChange(style) },
-                    label = { Text(label) }
+                    onClick = { if (enabled) onPaddleStyleChange(style) },
+                    enabled = enabled,
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (style.isPremium && !isStylePackOwned) {
+                                Icon(
+                                    Icons.Filled.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                            }
+                            Text(label)
+                        }
+                    }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedButton(
             onClick = onBack,
@@ -84,4 +117,30 @@ fun OptionsScreen(
             Text("INDIETRO", fontWeight = FontWeight.Bold)
         }
     }
+}
+
+private fun ballStyleLabel(style: BallStyle): String = when (style) {
+    BallStyle.NEON -> "NEON"
+    BallStyle.MINIMAL -> "MINIMAL"
+    BallStyle.FLAME -> "FIAMMA"
+    BallStyle.PULSE -> "PULSANTE"
+    BallStyle.PRISMA -> "PRISMA"
+    BallStyle.GHOST -> "FANTASMA"
+    BallStyle.PIXEL -> "PIXEL"
+    BallStyle.PLASMA -> "PLASMA"
+    BallStyle.ICE -> "GHIACCIO"
+    BallStyle.GOLD -> "ORO"
+}
+
+private fun paddleStyleLabel(style: PaddleStyle): String = when (style) {
+    PaddleStyle.NEON -> "NEON"
+    PaddleStyle.MINIMAL -> "MINIMAL"
+    PaddleStyle.SOLID -> "SOLIDO"
+    PaddleStyle.PULSE -> "PULSANTE"
+    PaddleStyle.PRISMA -> "PRISMA"
+    PaddleStyle.GHOST -> "FANTASMA"
+    PaddleStyle.PIXEL -> "PIXEL"
+    PaddleStyle.PLASMA -> "PLASMA"
+    PaddleStyle.ICE -> "GHIACCIO"
+    PaddleStyle.GOLD -> "ORO"
 }

@@ -26,6 +26,16 @@ android {
         }
     }
 
+    flavorDimensions += "store"
+    productFlavors {
+        create("googlePlay") {
+            dimension = "store"
+        }
+        create("huawei") {
+            dimension = "store"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -61,4 +71,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    "googlePlayImplementation"(libs.google.play.billing)
+    "huaweiImplementation"(libs.huawei.iap)
 }

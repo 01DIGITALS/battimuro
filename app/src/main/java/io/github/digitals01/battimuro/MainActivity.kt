@@ -11,47 +11,92 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import io.github.digitals01.battimuro.billing.BillingListener
+import io.github.digitals01.battimuro.billing.BillingManager
+import io.github.digitals01.battimuro.billing.BillingManagerFactory
+import io.github.digitals01.battimuro.billing.PurchaseRepository
 import io.github.digitals01.battimuro.game.BallStyle
 import io.github.digitals01.battimuro.game.PaddleStyle
 import io.github.digitals01.battimuro.screens.GameScreen
 import io.github.digitals01.battimuro.screens.HomeScreen
 import io.github.digitals01.battimuro.screens.OptionsScreen
+import io.github.digitals01.battimuro.screens.ShopScreen
 import io.github.digitals01.battimuro.ui.theme.BattimuroTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var purchaseRepository: PurchaseRepository
+    private lateinit var billingManager: BillingManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Lock orientation to Landscape
+        purchaseRepository = PurchaseRepository(applicationContext)
+        billingManager = BillingManagerFactory.create(applicationContext, purchaseRepository)
+
+        billingManager.setListener(object : BillingListener {
+            override fun onPurchaseComplete(productId: String, success: Boolean) {
+                if (success && productId == "style_pack") {
+                    purchaseRepository.setStylePackPurchased(true)
+                }
+            }
+
+            override fun onPurchaseError(message: String) {}
+
+            override fun onConnectionReady() {
+                billingManager.queryPurchases()
+            }
+        })
+
+        billingManager.connect()
+
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
-        // Delay splash screen for 2 seconds
         Handler(Looper.getMainLooper()).postDelayed({
             setTheme(R.style.Theme_Battimuro)
 
             setContent {
                 BattimuroTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        BattimuroApp()
+                        BattimuroApp(
+                            purchaseRepository = purchaseRepository,
+                            onPurchaseStylePack = {
+                                billingManager.purchaseStylePack(this@MainActivity)
+                            },
+                            onPurchaseDonation = {
+                                billingManager.purchaseDonation(this@MainActivity)
+                            }
+                        )
                     }
                 }
             }
         }, 2000)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        billingManager.disconnect()
     }
 }
 
 enum class Screen {
     HOME,
     OPTIONS,
+    SHOP,
     GAME
 }
 
 @Composable
-fun BattimuroApp() {
+fun BattimuroApp(
+    purchaseRepository: PurchaseRepository,
+    onPurchaseStylePack: () -> Unit,
+    onPurchaseDonation: () -> Unit
+) {
+    val isStylePackOwned by purchaseRepository.stylePackOwned.collectAsState()
+
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
 
-    // Game Options State
     var gameMode by remember { mutableStateOf(io.github.digitals01.battimuro.game.GameMode.ONE_VS_CPU) }
     var difficulty by remember { mutableStateOf(io.github.digitals01.battimuro.game.Difficulty.MEDIUM) }
     var playerIsLeft by remember { mutableStateOf(true) }
@@ -69,6 +114,9 @@ fun BattimuroApp() {
                 },
                 onOpenOptions = {
                     currentScreen = Screen.OPTIONS
+                },
+                onOpenShop = {
+                    currentScreen = Screen.SHOP
                 }
             )
         }
@@ -76,8 +124,25 @@ fun BattimuroApp() {
             OptionsScreen(
                 ballStyle = ballStyle,
                 paddleStyle = paddleStyle,
-                onBallStyleChange = { ballStyle = it },
-                onPaddleStyleChange = { paddleStyle = it },
+                onBallStyleChange = { newStyle ->
+                    if (!newStyle.isPremium || isStylePackOwned) {
+                        ballStyle = newStyle
+                    }
+                },
+                onPaddleStyleChange = { newStyle ->
+                    if (!newStyle.isPremium || isStylePackOwned) {
+                        paddleStyle = newStyle
+                    }
+                },
+                isStylePackOwned = isStylePackOwned,
+                onBack = { currentScreen = Screen.HOME }
+            )
+        }
+        Screen.SHOP -> {
+            ShopScreen(
+                isStylePackOwned = isStylePackOwned,
+                onPurchaseStylePack = onPurchaseStylePack,
+                onPurchaseDonation = onPurchaseDonation,
                 onBack = { currentScreen = Screen.HOME }
             )
         }
