@@ -1,4 +1,4 @@
-package com.example.battimuro.ui.theme
+package io.github.digitals01.battimuro.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -19,9 +19,7 @@ private val NeonColorScheme = darkColorScheme(
 
 @Composable
 fun BattimuroTheme(
-    // Force dark theme for the game feeling
     darkTheme: Boolean = true,
-    // Disable dynamic color to maintain the neon aesthetic
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.battimuro"
+    namespace = "io.github.digitals01.battimuro"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.battimuro"
+        applicationId = "io.github.digitals01.battimuro"
         minSdk = 29
         targetSdk = 36
         versionCode = 4

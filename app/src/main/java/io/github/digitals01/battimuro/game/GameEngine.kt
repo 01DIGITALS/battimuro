@@ -1,4 +1,4 @@
-package com.example.battimuro.game
+package io.github.digitals01.battimuro.game
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +23,7 @@ data class Paddle(
 enum class GameStatus {
     WAITING,
     PLAYING,
-    PAUSED, // Added for in-game menu
+    PAUSED,
     GAME_OVER
 }
 
@@ -38,30 +38,43 @@ enum class Difficulty(val speedFactor: Float, val reactionError: Float) {
     HARD(1.2f, 0.0f)
 }
 
+enum class BallStyle {
+    NEON,
+    MINIMAL,
+    FLAME
+}
+
+enum class PaddleStyle {
+    NEON,
+    MINIMAL,
+    SOLID
+}
+
 class GameEngine(
     private val width: Float,
     private val height: Float,
     val gameMode: GameMode,
     val difficulty: Difficulty = Difficulty.MEDIUM,
-    val playerIsLeft: Boolean = true // In PvCPU, which side is the player?
+    val playerIsLeft: Boolean = true
 ) {
-    // Observable State for Compose
     var playerScore by mutableStateOf(0)
         private set
-    var cpuScore by mutableStateOf(0) // or Player 2 score
+    var cpuScore by mutableStateOf(0)
         private set
     var status by mutableStateOf(GameStatus.WAITING)
-        private set // UI can read, only engine modifies
+        private set
 
     var ball by mutableStateOf(Ball(position = Offset(width / 2, height / 2), velocity = Offset(0f, 0f)))
         private set
-    
-    // Paddles - Vertical now
+
+    var ballTrail by mutableStateOf(listOf<Offset>())
+        private set
+    private val maxTrailSize = 8
+
     val paddleWidth = 40f
     val paddleHeight = 200f
     val paddleMargin = 50f
 
-    // Left Paddle (Player 1 or CPU)
     var leftPaddle by mutableStateOf(Paddle(
         position = Offset(paddleMargin, (height - paddleHeight) / 2),
         size = Size(paddleWidth, paddleHeight),
@@ -69,7 +82,6 @@ class GameEngine(
     ))
         private set
 
-    // Right Paddle (Player 2 or CPU or Player)
     var rightPaddle by mutableStateOf(Paddle(
         position = Offset(width - paddleMargin - paddleWidth, (height - paddleHeight) / 2),
         size = Size(paddleWidth, paddleHeight),
@@ -91,16 +103,14 @@ class GameEngine(
     }
 
     private fun resetBall() {
-        // Center
+        ballTrail = emptyList()
         var newBall = ball.copy(position = Offset(width / 2, height / 2))
-        
-        // Randomize start direction
+
         val speed = 15f
-        // In landscape, main velocity is X
         val angle = Random.nextFloat() * 3.14f
         val vx = if (Random.nextBoolean()) speed else -speed
-        val vy = (Random.nextFloat() - 0.5f) * speed // Some Y variation
-        
+        val vy = (Random.nextFloat() - 0.5f) * speed
+
         newBall.velocity = Offset(vx, vy)
         ball = newBall
     }
@@ -108,11 +118,11 @@ class GameEngine(
     fun update(deltaTime: Long) {
         if (status != GameStatus.PLAYING) return
 
-        // Update Ball Position
+        ballTrail = (ballTrail + ball.position).takeLast(maxTrailSize)
+
         val nextPos = ball.position + ball.velocity
         ball = ball.copy(position = nextPos)
 
-        // Wall Collisions (Top/Bottom) - Landscape logic
         if (ball.position.y - ball.radius < 0) {
             ball = ball.copy(
                 position = ball.position.copy(y = ball.radius),
@@ -126,23 +136,18 @@ class GameEngine(
             )
         }
 
-        // Paddle Collisions
         checkPaddleCollision(leftPaddle)
         checkPaddleCollision(rightPaddle)
 
-        // Goal Check (Left/Right)
         if (ball.position.x < 0) {
-            // Ball went off Left (Right Scored)
-            cpuScore++ // Or Player 2
+            cpuScore++
             resetBall()
         }
         if (ball.position.x > width) {
-            // Ball went off Right (Left Scored)
-            playerScore++ // Or Player 1
+            playerScore++
             resetBall()
         }
 
-        // AI Logic
         if (gameMode == GameMode.ONE_VS_CPU) {
             if (playerIsLeft) {
                 updateCpuPaddle(rightPaddle, isRight = true)
@@ -165,39 +170,32 @@ class GameEngine(
         )
 
         if (ballRect.overlaps(paddleRect)) {
-            // Reverse X velocity
             ball = ball.copy(velocity = ball.velocity.copy(x = -ball.velocity.x))
-            
-            // Add "english" based on Y hit
+
             val hitPoint = ball.position.y - (paddle.position.y + paddle.size.height / 2)
             ball = ball.copy(velocity = ball.velocity.copy(y = ball.velocity.y + hitPoint * 0.1f))
-            
-            // Speed up
+
             ball = ball.copy(velocity = ball.velocity * 1.05f)
         }
     }
 
     private fun updateCpuPaddle(paddle: Paddle, isRight: Boolean) {
-        // Only move if ball is coming towards CPU
         val isIncoming = if (isRight) ball.velocity.x > 0 else ball.velocity.x < 0
-        
-        var targetY = height / 2 // Default to center
+
+        var targetY = height / 2
         if (isIncoming) {
-            // Add error based on difficulty? Simple tracking for now
              targetY = ball.position.y - paddle.size.height / 2
         }
 
         val currentY = paddle.position.y
-        // Lerp speed based on difficulty
         val lerpFactor = 0.1f * difficulty.speedFactor
-        
+
         val newY = currentY + (targetY - currentY) * lerpFactor
-        
+
         val newPos = paddle.position.copy(
             y = newY.coerceIn(0f, height - paddle.size.height)
         )
-        
-        // Update the correct paddle state
+
         if (isRight) {
             rightPaddle = rightPaddle.copy(position = newPos)
         } else {
@@ -207,7 +205,7 @@ class GameEngine(
 
     fun updatePaddle(y: Float, isLeftPaddle: Boolean) {
         val clampY = (y - paddleHeight / 2).coerceIn(0f, height - paddleHeight)
-        
+
         if (isLeftPaddle) {
             leftPaddle = leftPaddle.copy(position = leftPaddle.position.copy(y = clampY))
         } else {
@@ -215,4 +213,3 @@ class GameEngine(
         }
     }
 }
-

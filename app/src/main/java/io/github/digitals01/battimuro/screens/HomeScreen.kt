@@ -1,4 +1,4 @@
-package com.example.battimuro.screens
+package io.github.digitals01.battimuro.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,86 +12,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
-import android.widget.Toast
-import com.example.battimuro.game.Difficulty
-import com.example.battimuro.game.GameMode
-import com.example.battimuro.ui.theme.NeonCyan
-import com.example.battimuro.ui.theme.NeonGreen
-import com.example.battimuro.ui.theme.NeonMagenta
-import kotlinx.coroutines.launch
+import io.github.digitals01.battimuro.game.Difficulty
+import io.github.digitals01.battimuro.game.GameMode
+import io.github.digitals01.battimuro.ui.theme.NeonCyan
+import io.github.digitals01.battimuro.ui.theme.NeonGreen
+import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 
 @Composable
 fun HomeScreen(
-    onStartGame: (GameMode, Difficulty, Boolean) -> Unit
+    onStartGame: (GameMode, Difficulty, Boolean) -> Unit,
+    onOpenOptions: () -> Unit
 ) {
     val context = LocalContext.current
-    val CURRENT_VERSION = remember {
+    val currentVersion = remember {
         try {
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
             "v${packageInfo.versionName}"
         } catch (e: Exception) {
-            "v0.9"
+            "v1.0.3"
         }
     }
-    
+
     var gameMode by remember { mutableStateOf(GameMode.ONE_VS_CPU) }
     var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
     var playerIsLeft by remember { mutableStateOf(true) }
     var showAbout by remember { mutableStateOf(false) }
-    
-    // Update States
-    var showUpdateDialog by remember { mutableStateOf(false) }
-    var newVersionName by remember { mutableStateOf("") }
-    var updateUrl by remember { mutableStateOf("") }
-    var isCheckingUpdate by remember { mutableStateOf(false) }
-    
-    val uriHandler = LocalUriHandler.current
-    val scope = rememberCoroutineScope()
 
     if (showAbout) {
         AlertDialog(
             onDismissRequest = { showAbout = false },
             title = { Text("Info su Battimuro") },
-            text = { 
-                Text("Versione: $CURRENT_VERSION\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.\n\nNota: Questa versione è distribuita gratuitamente perché è in fase di test (anche se stabile), per capire se piace e se è il caso di proseguire con lo sviluppo.") 
+            text = {
+                Text("Versione: $currentVersion\nSviluppatore: Louis Sanges\n\nIl classico gioco pong, reinventato per l'era moderna.\n\nNota: Questa versione è distribuita gratuitamente perché è in fase di test (anche se stabile), per capire se piace e se è il caso di proseguire con lo sviluppo.")
             },
             confirmButton = {
                 TextButton(onClick = { showAbout = false }) {
                     Text("Chiudi")
-                }
-            }
-        )
-    }
-
-    if (showUpdateDialog) {
-        AlertDialog(
-            onDismissRequest = { showUpdateDialog = false },
-            title = { Text("Aggiornamento Disponibile") },
-            text = { 
-                Text("È disponibile una nuova versione: $newVersionName\nScaricare ora?") 
-            },
-            confirmButton = {
-                TextButton(onClick = { 
-                    try {
-                       // Direct download and install flow
-                       com.example.battimuro.utils.UpdateDownloader.downloadAndInstall(context, updateUrl, "battimuro_update.apk")
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        android.widget.Toast.makeText(context, "Errore: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                    showUpdateDialog = false 
-                }) {
-                    Text("Scarica & Installa")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showUpdateDialog = false }) {
-                    Text("Più tardi")
                 }
             }
         )
@@ -111,7 +70,6 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Title
             Text(
                 text = "BATTIMURO",
                 style = TextStyle(
@@ -131,7 +89,6 @@ fun HomeScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Start Button
             Button(
                 onClick = { onStartGame(gameMode, difficulty, playerIsLeft) },
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = Color.Black),
@@ -139,39 +96,15 @@ fun HomeScreen(
             ) {
                 Text("GIOCA", fontWeight = FontWeight.Bold, fontSize = 20.sp)
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // Footer: About & Update
+
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                TextButton(onClick = onOpenOptions) {
+                    Text("Opzioni", color = Color.LightGray)
+                }
                 TextButton(onClick = { showAbout = true }) {
                     Text("Info", color = Color.LightGray)
-                }
-                TextButton(
-                    onClick = { 
-                        if (!isCheckingUpdate) {
-                            isCheckingUpdate = true
-                            scope.launch {
-                                val result = com.example.battimuro.utils.UpdateChecker.checkForUpdate()
-                                isCheckingUpdate = false
-                                if (result != null) {
-                                    val (tag, url) = result
-                                    // Simple check: if tag from github is different from current
-                                    if (tag != CURRENT_VERSION) {
-                                        newVersionName = tag
-                                        updateUrl = url
-                                        showUpdateDialog = true
-                                    } else {
-                                        Toast.makeText(context, "Hai già l'ultima versione!", Toast.LENGTH_SHORT).show()
-                                    }
-                                } else {
-                                    Toast.makeText(context, "Umm, errore nel controllo aggiornamenti.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-                ) {
-                    Text(if (isCheckingUpdate) "Controllo..." else "Aggiornamenti", color = Color.LightGray)
                 }
             }
         }
@@ -192,7 +125,6 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-             // Game Mode
             Text("MODALITÀ", color = Color.Gray, fontSize = 12.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
@@ -206,10 +138,9 @@ fun HomeScreen(
                     label = { Text("1 VS 1") }
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Difficulty (Only if CPU)
             if (gameMode == GameMode.ONE_VS_CPU) {
                 Text("DIFFICOLTÀ", color = Color.Gray, fontSize = 12.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -229,7 +160,6 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Zone Selection (Only if CPU)
             Text(if(gameMode == GameMode.ONE_VS_CPU) "LA TUA ZONA" else "ZONA G1 (SX)", color = Color.Gray, fontSize = 12.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
@@ -246,4 +176,3 @@ fun HomeScreen(
         }
     }
 }
-

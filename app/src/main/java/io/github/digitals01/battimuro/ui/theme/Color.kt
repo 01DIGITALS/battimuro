@@ -1,4 +1,4 @@
-package com.example.battimuro.ui.theme
+package io.github.digitals01.battimuro.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -15,5 +15,7 @@ val NeonGreen = Color(0xFF39FF14)
 val NeonCyan = Color(0xFF00FFFF)
 val NeonMagenta = Color(0xFFFF00FF)
 val NeonYellow = Color(0xFFFFFF00)
+val NeonOrange = Color(0xFFFF6600)
+val NeonRed = Color(0xFFFF0000)
 val DarkBackground = Color(0xFF0A0A0A)
 val NeonGray = Color(0xFF1B1B1B)
