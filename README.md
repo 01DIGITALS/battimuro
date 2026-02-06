@@ -1,51 +1,36 @@
-# Battimuro - Neon Landscape Edition
+# Battimuro
 
-**Battimuro** è una rivisitazione moderna del classico gioco arcade Pong, realizzato per Android 10+ utilizzando **Jetpack Compose**. Presenta un'estetica neon futuristica, gameplay in modalità landscape e diverse modalità di gioco.
+Il classico gioco Pong, reinventato per l'era moderna con un'estetica neon.
 
-## ✨ Funzionalità
+## Caratteristiche
 
-- **Estetica Neon**: Colori vivaci (Ciano, Magenta, Verde), sfondo scuro ed effetti luminosi.
-- **Gameplay Landscape**: Palette verticali sui lati sinistro e destro in un campo orizzontale.
-- **Modalità di Gioco**:
-  - **1 vs CPU**: Sfida un avversario AI con 3 livelli di difficoltà (Facile, Medio, Difficile).
-  - **1 vs 1**: Multiplayer locale sullo stesso dispositivo con supporto multi-touch.
-- **Punteggio Dinamico**: Aggiornamenti del punteggio in tempo reale visualizzati sullo sfondo.
-- **Sistema di Aggiornamento**: Controllo integrato delle nuove versioni tramite le Release di GitHub.
-- **Localizzazione**: Completamente tradotto in Italiano 🇮🇹.
+- **Modalita di gioco:** 1 vs CPU con tre livelli di difficolta (Facile, Medio, Difficile), oppure 1 vs 1 locale sullo stesso dispositivo
+- **Stili personalizzabili:** 3 stili per la pallina (Neon, Minimal, Fiamma) e 3 per i respingenti (Neon, Minimal, Solido), combinabili liberamente
+- **Controlli touch** ottimizzati per il gioco in orizzontale
+- **Safe zone laterali** per evitare interferenze con le gesture di sistema
 
-## 📱 Screenshot
-
-*(Aggiungi screenshot qui)*
-
-## 🛠️ Stack Tecnologico
+## Stack Tecnologico
 
 - **Linguaggio**: Kotlin
 - **Framework UI**: Jetpack Compose (Material3)
 - **SDK Minimo**: 29 (Android 10)
 - **SDK Target**: 36
-- **Architettura**: State hoisting simil-MVVM con logica `GameEngine` separata dalla UI.
 
-## 🚀 Installazione
+## Download
 
-1. Vai alla pagina [Releases](https://github.com/01DIGITALS/battimuro/releases).
-2. Scarica l'ultimo file `app-release.apk`.
-3. Installa l'APK sul tuo dispositivo Android (assicurati che l'installazione da origini sconosciute sia abilitata).
+- [Google Play Store](#) *(in arrivo)*
+- [Huawei AppGallery](#) *(in arrivo)*
 
-## 👨‍💻 Sviluppo
+## Privacy
 
-1. Clona il repository:
-   ```bash
-   git clone https://github.com/01DIGITALS/battimuro.git
-   ```
-2. Apri in **Android Studio**.
-3. Sincronizza il progetto Gradle.
-4. Esegui su un emulatore o dispositivo fisico.
+[Privacy Policy](https://01digitals.github.io/battimuro/privacy-policy)
 
-## 📦 Versionamento
+## Autore
 
-Utilizziamo [GitHub Releases](https://github.com/01DIGITALS/battimuro/releases) per il versionamento rigoroso.
-- **Versione Corrente**: v0.9 (Stabile)
+**Louis Sanges** - [01DIGITALS](https://github.com/01DIGITALS)
 
-## 👤 Autore
+## Licenza
 
-**Louis Sanges**
+Copyright (c) 2026 Louis Sanges. All Rights Reserved.
+
+Questo software e il relativo codice sorgente sono di proprieta esclusiva dell'autore. Nessuna parte di questo progetto puo essere riprodotta, distribuita o modificata senza autorizzazione scritta. Consulta il file [LICENSE](LICENSE) per i dettagli completi.
