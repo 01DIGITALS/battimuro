@@ -10,6 +10,8 @@ class PurchaseRepository(context: Context) {
         private const val PREFS_NAME = "battimuro_purchases"
         private const val KEY_STYLE_PACK = "style_pack_purchased"
         private const val KEY_LEVELS_PACK = "levels_pack_purchased"
+        private const val KEY_BONUS_PACK = "bonus_pack_purchased"
+        private const val KEY_POWER_UPS_ENABLED = "power_ups_enabled"
     }
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -33,4 +35,20 @@ class PurchaseRepository(context: Context) {
     }
 
     fun isLevelsPackPurchased(): Boolean = _levelsPackOwned.value
+
+    private val _bonusPackOwned = MutableStateFlow(prefs.getBoolean(KEY_BONUS_PACK, false))
+    val bonusPackOwned: StateFlow<Boolean> = _bonusPackOwned.asStateFlow()
+
+    fun setBonusPackPurchased(purchased: Boolean) {
+        prefs.edit().putBoolean(KEY_BONUS_PACK, purchased).apply()
+        _bonusPackOwned.value = purchased
+    }
+
+    private val _powerUpsEnabled = MutableStateFlow(prefs.getBoolean(KEY_POWER_UPS_ENABLED, true))
+    val powerUpsEnabled: StateFlow<Boolean> = _powerUpsEnabled.asStateFlow()
+
+    fun setPowerUpsEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_POWER_UPS_ENABLED, enabled).apply()
+        _powerUpsEnabled.value = enabled
+    }
 }

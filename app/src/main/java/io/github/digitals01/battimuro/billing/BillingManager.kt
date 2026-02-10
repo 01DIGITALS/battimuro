@@ -8,6 +8,7 @@ interface BillingManager {
     fun purchaseStylePack(activity: Activity)
     fun purchaseLevelsPack(activity: Activity)
     fun purchaseDonation(activity: Activity)
+    fun purchaseBonusPack(activity: Activity)
     fun queryPurchases()
     fun setListener(listener: BillingListener)
 }

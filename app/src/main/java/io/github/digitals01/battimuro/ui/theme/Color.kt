@@ -23,3 +23,8 @@ val GoldBase = Color(0xFFFFD700)
 val GoldLight = Color(0xFFFFF8DC)
 val DarkBackground = Color(0xFF0A0A0A)
 val NeonGray = Color(0xFF1B1B1B)
+
+// Power-up colors
+val PowerUpGreen = Color(0xFF00FF88)
+val PowerUpYellow = Color(0xFFFFDD00)
+val PowerUpRed = Color(0xFFFF4444)

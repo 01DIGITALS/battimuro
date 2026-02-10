@@ -16,43 +16,91 @@
         }
         h1 { color: #00ffff; }
         h2 { color: #39ff14; margin-top: 2em; }
+        h3 { color: #cccccc; margin-top: 1.2em; }
         a { color: #00ffff; }
         .update { color: #888; font-size: 0.9em; }
+        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+        th { background: #1b1b1b; color: #39ff14; }
     </style>
 </head>
 <body>
     <h1>Privacy Policy - Battimuro</h1>
-    <p class="update">Ultimo aggiornamento: 6 febbraio 2026</p>
+    <p class="update">Ultimo aggiornamento: 10 febbraio 2026</p>
 
-    <p>La presente informativa sulla privacy descrive come Battimuro ("l'App", "il Gioco"), sviluppata da Louis Sanges ("lo Sviluppatore", "noi"), gestisce le informazioni degli utenti.</p>
+    <p>La presente informativa sulla privacy descrive come Battimuro ("l'App", "il Gioco"), sviluppata da Louis Sanges ("lo Sviluppatore", "noi"), raccoglie e gestisce le informazioni degli utenti.</p>
 
     <h2>1. Dati raccolti</h2>
-    <p>L'App non raccoglie, memorizza o trasmette dati personali degli utenti. Non utilizziamo cookie, strumenti di tracciamento, analytics o tecnologie simili.</p>
-    <p>L'App funziona interamente in locale sul dispositivo dell'utente e non richiede connessione a Internet per il suo funzionamento principale.</p>
+    <p>L'App raccoglie le seguenti categorie di dati, necessarie al suo funzionamento e alla gestione degli acquisti in-app:</p>
+
+    <table>
+        <tr>
+            <th>Categoria</th>
+            <th>Dati specifici</th>
+            <th>Finalit&agrave;</th>
+        </tr>
+        <tr>
+            <td>Informazioni sul dispositivo</td>
+            <td>Identificativo del dispositivo, modello, versione del sistema operativo</td>
+            <td>Funzionamento dell'App e degli SDK delle piattaforme di distribuzione (Google Play Services, Huawei HMS Core)</td>
+        </tr>
+        <tr>
+            <td>Informazioni sulle transazioni</td>
+            <td>Cronologia degli acquisti in-app, stato delle transazioni, token di acquisto</td>
+            <td>Verifica e gestione degli acquisti in-app (sblocco funzionalit&agrave; premium)</td>
+        </tr>
+        <tr>
+            <td>Dati di utilizzo</td>
+            <td>Dati base di analytics raccolti automaticamente dagli SDK della piattaforma</td>
+            <td>Funzionalit&agrave; dell'App e analisi aggregate delle prestazioni</td>
+        </tr>
+    </table>
+
+    <h3>1.1 Dati NON raccolti</h3>
+    <p>L'App <strong>non</strong> raccoglie: dati di geolocalizzazione, contatti, foto o file multimediali, dati della fotocamera o del microfono, dati sanitari, dati finanziari diretti (numeri di carte di credito, conti bancari).</p>
+
+    <h3>1.2 Archiviazione locale</h3>
+    <p>L'App memorizza le preferenze di gioco (stili, livelli, impostazioni) esclusivamente in locale sul dispositivo dell'utente tramite SharedPreferences. Questi dati non vengono trasmessi a server esterni.</p>
 
     <h2>2. Acquisti in-app</h2>
-    <p>L'App potrebbe offrire acquisti in-app attraverso i servizi di pagamento forniti dalle piattaforme di distribuzione (Google Play Billing, Huawei In-App Purchases o servizi equivalenti).</p>
-    <p>Le transazioni di acquisto sono gestite interamente dalla piattaforma di distribuzione (Google LLC, Huawei Technologies Co. Ltd. o altro fornitore dello store). Lo Sviluppatore <strong>non raccoglie, memorizza o ha accesso</strong> a dati di pagamento, numeri di carte di credito o informazioni finanziarie degli utenti.</p>
+    <p>L'App offre acquisti in-app opzionali (pacchetti di stili, livelli, bonus e donazione) attraverso i servizi di pagamento forniti dalle piattaforme di distribuzione (Google Play Billing, Huawei In-App Purchases).</p>
+    <p>Le transazioni di acquisto sono gestite dalla piattaforma di distribuzione (Google LLC, Huawei Technologies Co. Ltd.). Lo Sviluppatore riceve esclusivamente la conferma dello stato dell'acquisto (completato/non completato) per sbloccare le funzionalit&agrave; premium. Lo Sviluppatore <strong>non ha accesso</strong> a dati di pagamento, numeri di carte di credito o informazioni finanziarie degli utenti.</p>
     <p>Per informazioni su come le piattaforme gestiscono i dati di pagamento, si rimanda alle rispettive informative:</p>
     <ul>
         <li><a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
         <li><a href="https://consumer.huawei.com/en/privacy/privacy-policy/" target="_blank">Huawei Privacy Policy</a></li>
     </ul>
 
-    <h2>3. Dati raccolti dalle piattaforme di distribuzione</h2>
-    <p>Le piattaforme attraverso le quali l'App viene distribuita (Google Play Store, Huawei AppGallery) possono raccogliere dati in modo indipendente secondo le proprie informative sulla privacy. Lo Sviluppatore non ha controllo su tali pratiche di raccolta dati.</p>
+    <h2>3. Condivisione dei dati con terze parti</h2>
+    <p>I dati indicati nella sezione 1 vengono condivisi con le seguenti terze parti tramite i rispettivi SDK integrati nell'App:</p>
+    <ul>
+        <li><strong>Google LLC</strong> (Google Play Services, Google Play Billing) &mdash; per la gestione degli acquisti e il funzionamento dell'App sulla piattaforma Google Play.</li>
+        <li><strong>Huawei Technologies Co. Ltd.</strong> (HMS Core, Huawei IAP) &mdash; per la gestione degli acquisti e il funzionamento dell'App sulla piattaforma Huawei AppGallery.</li>
+    </ul>
+    <p>Lo Sviluppatore non vende, cede o condivide i dati degli utenti con terze parti per finalit&agrave; di marketing o pubblicit&agrave;.</p>
 
-    <h2>4. Dati dei minori</h2>
-    <p>L'App non raccoglie consapevolmente dati personali da minori di 13 anni. Poiché non raccogliamo alcun dato personale, questa eventualità non si applica.</p>
+    <h2>4. Conservazione dei dati</h2>
+    <p>Le preferenze di gioco sono conservate localmente sul dispositivo fino alla disinstallazione dell'App. I dati raccolti tramite gli SDK delle piattaforme sono conservati secondo le politiche di Google e Huawei.</p>
 
-    <h2>5. Modifiche alla Privacy Policy</h2>
-    <p>Ci riserviamo il diritto di aggiornare questa Privacy Policy in qualsiasi momento. Le modifiche saranno pubblicate su questa pagina con la data di ultimo aggiornamento. L'uso continuato dell'App dopo la pubblicazione delle modifiche costituisce accettazione delle stesse.</p>
+    <h2>5. Dati dei minori</h2>
+    <p>L'App non &egrave; specificamente rivolta a minori di 13 anni. L'App non raccoglie consapevolmente dati personali da minori di 13 anni oltre a quanto indicato nella sezione 1. I genitori o tutori che ritengono che un minore abbia effettuato acquisti non autorizzati possono contattare la piattaforma di distribuzione per richiedere un rimborso.</p>
 
     <h2>6. Diritti dell'utente (GDPR)</h2>
-    <p>Ai sensi del Regolamento Europeo 2016/679 (GDPR), gli utenti hanno diritto di accesso, rettifica, cancellazione e portabilità dei propri dati personali. Poiché l'App non raccoglie dati personali, tali diritti non trovano applicazione pratica. Per qualsiasi richiesta, è comunque possibile contattare lo Sviluppatore.</p>
+    <p>Ai sensi del Regolamento Europeo 2016/679 (GDPR), gli utenti hanno il diritto di:</p>
+    <ul>
+        <li><strong>Accesso:</strong> richiedere informazioni sui dati raccolti.</li>
+        <li><strong>Rettifica:</strong> richiedere la correzione di dati inesatti.</li>
+        <li><strong>Cancellazione:</strong> richiedere la rimozione dei propri dati. Le preferenze locali possono essere eliminate disinstallando l'App.</li>
+        <li><strong>Portabilit&agrave;:</strong> richiedere una copia dei propri dati in formato leggibile.</li>
+        <li><strong>Opposizione:</strong> opporsi al trattamento dei propri dati.</li>
+    </ul>
+    <p>Per esercitare questi diritti, contattare lo Sviluppatore ai recapiti indicati nella sezione 8. Per i dati gestiti dalle piattaforme di distribuzione, rivolgersi direttamente a Google o Huawei.</p>
 
-    <h2>7. Contatti</h2>
-    <p>Per domande o richieste relative a questa Privacy Policy:</p>
+    <h2>7. Modifiche alla Privacy Policy</h2>
+    <p>Ci riserviamo il diritto di aggiornare questa Privacy Policy in qualsiasi momento. Le modifiche saranno pubblicate su questa pagina con la data di ultimo aggiornamento. L'uso continuato dell'App dopo la pubblicazione delle modifiche costituisce accettazione delle stesse.</p>
+
+    <h2>8. Contatti</h2>
+    <p>Per domande o richieste relative a questa Privacy Policy o al trattamento dei dati:</p>
     <p>Sviluppatore: Louis Sanges<br>
     Email: <a href="mailto:contact@01digitals.github.io">contact@01digitals.github.io</a><br>
     GitHub: <a href="https://github.com/01DIGITALS" target="_blank">github.com/01DIGITALS</a></p>

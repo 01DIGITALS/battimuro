@@ -26,8 +26,10 @@ import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 fun ShopScreen(
     isStylePackOwned: Boolean,
     isLevelsPackOwned: Boolean,
+    isBonusPackOwned: Boolean,
     onPurchaseStylePack: () -> Unit,
     onPurchaseLevelsPack: () -> Unit,
+    onPurchaseBonusPack: () -> Unit,
     onPurchaseDonation: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -73,9 +75,8 @@ fun ShopScreen(
             title = "PACCHETTO BONUS",
             description = "Power-up durante la partita: respingente allargato, multiball e penalizzazione riduzione barra.",
             price = "1,99 \u20AC",
-            isPurchased = false,
-            isComingSoon = true,
-            onPurchase = {},
+            isPurchased = isBonusPackOwned,
+            onPurchase = onPurchaseBonusPack,
             accentColor = NeonMagenta
         )
 

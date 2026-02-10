@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.digitals01.battimuro.game.BallStyle
+import io.github.digitals01.battimuro.game.GameLevel
 import io.github.digitals01.battimuro.game.PaddleStyle
 import io.github.digitals01.battimuro.ui.theme.NeonCyan
 import io.github.digitals01.battimuro.ui.theme.NeonMagenta
@@ -24,9 +25,15 @@ import io.github.digitals01.battimuro.ui.theme.NeonMagenta
 fun OptionsScreen(
     ballStyle: BallStyle,
     paddleStyle: PaddleStyle,
+    gameLevel: GameLevel,
     onBallStyleChange: (BallStyle) -> Unit,
     onPaddleStyleChange: (PaddleStyle) -> Unit,
+    onGameLevelChange: (GameLevel) -> Unit,
     isStylePackOwned: Boolean,
+    isLevelsPackOwned: Boolean,
+    isBonusPackOwned: Boolean,
+    powerUpsEnabled: Boolean,
+    onPowerUpsToggle: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
     Column(
@@ -104,6 +111,63 @@ fun OptionsScreen(
                             Text(label)
                         }
                     }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text("LIVELLO", color = Color.Gray, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            GameLevel.entries.forEach { level ->
+                val enabled = level == GameLevel.NONE || isLevelsPackOwned
+                FilterChip(
+                    selected = gameLevel == level,
+                    onClick = { if (enabled) onGameLevelChange(level) },
+                    enabled = enabled,
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (level != GameLevel.NONE && !isLevelsPackOwned) {
+                                Icon(
+                                    Icons.Filled.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                            }
+                            Text(level.displayName)
+                        }
+                    }
+                )
+            }
+        }
+
+        if (isBonusPackOwned) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text("POWER-UP", color = Color.Gray, fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    if (powerUpsEnabled) "ATTIVI" else "DISATTIVI",
+                    color = if (powerUpsEnabled) NeonMagenta else Color.Gray,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Switch(
+                    checked = powerUpsEnabled,
+                    onCheckedChange = onPowerUpsToggle,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = NeonMagenta,
+                        checkedTrackColor = NeonMagenta.copy(alpha = 0.3f)
+                    )
                 )
             }
         }

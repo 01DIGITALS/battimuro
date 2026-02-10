@@ -44,6 +44,9 @@ class MainActivity : ComponentActivity() {
                 if (success && productId == "levels_pack") {
                     purchaseRepository.setLevelsPackPurchased(true)
                 }
+                if (success && productId == "bonus_pack") {
+                    purchaseRepository.setBonusPackPurchased(true)
+                }
             }
 
             override fun onPurchaseError(message: String) {}
@@ -70,6 +73,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onPurchaseLevelsPack = {
                                 billingManager.purchaseLevelsPack(this@MainActivity)
+                            },
+                            onPurchaseBonusPack = {
+                                billingManager.purchaseBonusPack(this@MainActivity)
                             },
                             onPurchaseDonation = {
                                 billingManager.purchaseDonation(this@MainActivity)
@@ -99,10 +105,13 @@ fun BattimuroApp(
     purchaseRepository: PurchaseRepository,
     onPurchaseStylePack: () -> Unit,
     onPurchaseLevelsPack: () -> Unit,
+    onPurchaseBonusPack: () -> Unit,
     onPurchaseDonation: () -> Unit
 ) {
     val isStylePackOwned by purchaseRepository.stylePackOwned.collectAsState()
     val isLevelsPackOwned by purchaseRepository.levelsPackOwned.collectAsState()
+    val isBonusPackOwned by purchaseRepository.bonusPackOwned.collectAsState()
+    val powerUpsEnabled by purchaseRepository.powerUpsEnabled.collectAsState()
 
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
 
@@ -116,14 +125,12 @@ fun BattimuroApp(
     when (currentScreen) {
         Screen.HOME -> {
             HomeScreen(
-                onStartGame = { mode, diff, isLeft, level ->
+                onStartGame = { mode, diff, isLeft ->
                     gameMode = mode
                     difficulty = diff
                     playerIsLeft = isLeft
-                    gameLevel = level
                     currentScreen = Screen.GAME
                 },
-                isLevelsPackOwned = isLevelsPackOwned,
                 onOpenOptions = {
                     currentScreen = Screen.OPTIONS
                 },
@@ -136,6 +143,7 @@ fun BattimuroApp(
             OptionsScreen(
                 ballStyle = ballStyle,
                 paddleStyle = paddleStyle,
+                gameLevel = gameLevel,
                 onBallStyleChange = { newStyle ->
                     if (!newStyle.isPremium || isStylePackOwned) {
                         ballStyle = newStyle
@@ -146,7 +154,16 @@ fun BattimuroApp(
                         paddleStyle = newStyle
                     }
                 },
+                onGameLevelChange = { newLevel ->
+                    if (newLevel == GameLevel.NONE || isLevelsPackOwned) {
+                        gameLevel = newLevel
+                    }
+                },
                 isStylePackOwned = isStylePackOwned,
+                isLevelsPackOwned = isLevelsPackOwned,
+                isBonusPackOwned = isBonusPackOwned,
+                powerUpsEnabled = powerUpsEnabled,
+                onPowerUpsToggle = { purchaseRepository.setPowerUpsEnabled(it) },
                 onBack = { currentScreen = Screen.HOME }
             )
         }
@@ -154,8 +171,10 @@ fun BattimuroApp(
             ShopScreen(
                 isStylePackOwned = isStylePackOwned,
                 isLevelsPackOwned = isLevelsPackOwned,
+                isBonusPackOwned = isBonusPackOwned,
                 onPurchaseStylePack = onPurchaseStylePack,
                 onPurchaseLevelsPack = onPurchaseLevelsPack,
+                onPurchaseBonusPack = onPurchaseBonusPack,
                 onPurchaseDonation = onPurchaseDonation,
                 onBack = { currentScreen = Screen.HOME }
             )
@@ -168,6 +187,7 @@ fun BattimuroApp(
                 ballStyle = ballStyle,
                 paddleStyle = paddleStyle,
                 gameLevel = gameLevel,
+                powerUpsEnabled = isBonusPackOwned && powerUpsEnabled,
                 onGameOver = {
                     currentScreen = Screen.HOME
                 },

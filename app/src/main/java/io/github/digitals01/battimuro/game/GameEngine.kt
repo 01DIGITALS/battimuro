@@ -4,10 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 data class Ball(
@@ -66,13 +67,22 @@ enum class PaddleStyle(val isPremium: Boolean = false) {
     GOLD(isPremium = true)
 }
 
+enum class PowerUpType { WIDER_PADDLE, MULTIBALL, PADDLE_SHRINK }
+
+data class PowerUp(val type: PowerUpType, val position: Offset, val radius: Float = 30f)
+
+enum class LastTouch { LEFT, RIGHT, NONE }
+
+data class ActiveEffect(val type: PowerUpType, val targetIsLeft: Boolean)
+
 class GameEngine(
     private val width: Float,
     private val height: Float,
     val gameMode: GameMode,
     val difficulty: Difficulty = Difficulty.MEDIUM,
     val playerIsLeft: Boolean = true,
-    val gameLevel: GameLevel = GameLevel.NONE
+    val gameLevel: GameLevel = GameLevel.NONE,
+    val powerUpsEnabled: Boolean = false
 ) {
     var playerScore by mutableStateOf(0)
         private set
@@ -81,11 +91,13 @@ class GameEngine(
     var status by mutableStateOf(GameStatus.WAITING)
         private set
 
-    var ball by mutableStateOf(Ball(position = Offset(width / 2, height / 2), velocity = Offset(0f, 0f)))
+    var balls by mutableStateOf(listOf(Ball(position = Offset(width / 2, height / 2), velocity = Offset(0f, 0f))))
         private set
+    val ball: Ball get() = balls.first()
 
-    var ballTrail by mutableStateOf(listOf<Offset>())
+    var ballTrails by mutableStateOf(listOf(listOf<Offset>()))
         private set
+    val ballTrail: List<Offset> get() = ballTrails.first()
     private val maxTrailSize = 12
 
     var gameTimeMs by mutableStateOf(0L)
@@ -93,6 +105,17 @@ class GameEngine(
 
     var obstacles by mutableStateOf(createObstacles())
         private set
+
+    // Power-up state
+    var powerUp by mutableStateOf<PowerUp?>(null)
+        private set
+    var activeEffect by mutableStateOf<ActiveEffect?>(null)
+        private set
+    var lastTouch by mutableStateOf(LastTouch.NONE)
+        private set
+    private var powerUpCooldownMs = 0L
+    private val powerUpSpawnDelay = 5000L
+    private val powerUpRespawnDelay = 3000L
 
     val paddleWidth = 40f
     val paddleHeight = 200f
@@ -115,6 +138,9 @@ class GameEngine(
     fun start() {
         resetBall()
         status = GameStatus.PLAYING
+        if (powerUpsEnabled) {
+            powerUpCooldownMs = powerUpSpawnDelay
+        }
     }
 
     fun pause() {
@@ -126,51 +152,187 @@ class GameEngine(
     }
 
     private fun resetBall() {
-        ballTrail = emptyList()
-        var newBall = ball.copy(position = Offset(width / 2, height / 2))
+        ballTrails = listOf(emptyList())
+        lastTouch = LastTouch.NONE
+        deactivateEffect()
 
         val speed = 15f
-        val angle = Random.nextFloat() * 3.14f
         val vx = if (Random.nextBoolean()) speed else -speed
         val vy = (Random.nextFloat() - 0.5f) * speed
 
-        newBall.velocity = Offset(vx, vy)
-        ball = newBall
+        balls = listOf(
+            Ball(
+                position = Offset(width / 2, height / 2),
+                velocity = Offset(vx, vy)
+            )
+        )
+
+        if (powerUpsEnabled) {
+            powerUp = null
+            powerUpCooldownMs = powerUpRespawnDelay
+        }
+    }
+
+    private fun spawnPowerUp() {
+        val type = PowerUpType.entries.random()
+        val x = width * (0.2f + Random.nextFloat() * 0.6f)
+        val y = height * (0.15f + Random.nextFloat() * 0.7f)
+        powerUp = PowerUp(type = type, position = Offset(x, y))
+    }
+
+    private fun checkPowerUpCollision() {
+        val pu = powerUp ?: return
+        for (b in balls) {
+            val dx = b.position.x - pu.position.x
+            val dy = b.position.y - pu.position.y
+            val dist = sqrt(dx * dx + dy * dy)
+            if (dist < b.radius + pu.radius) {
+                activatePowerUp(pu.type)
+                powerUp = null
+                powerUpCooldownMs = powerUpRespawnDelay
+                return
+            }
+        }
+    }
+
+    private fun activatePowerUp(type: PowerUpType) {
+        val targetIsLeft = when (lastTouch) {
+            LastTouch.LEFT -> true
+            LastTouch.RIGHT -> false
+            LastTouch.NONE -> Random.nextBoolean()
+        }
+
+        deactivateEffect()
+
+        when (type) {
+            PowerUpType.WIDER_PADDLE -> {
+                activeEffect = ActiveEffect(PowerUpType.WIDER_PADDLE, targetIsLeft)
+                resizePaddle(targetIsLeft, paddleHeight * 1.5f)
+            }
+            PowerUpType.PADDLE_SHRINK -> {
+                activeEffect = ActiveEffect(PowerUpType.PADDLE_SHRINK, targetIsLeft)
+                resizePaddle(targetIsLeft, paddleHeight * 0.5f)
+            }
+            PowerUpType.MULTIBALL -> {
+                activeEffect = ActiveEffect(PowerUpType.MULTIBALL, targetIsLeft)
+                spawnExtraBalls(2)
+            }
+        }
+    }
+
+    private fun resizePaddle(isLeft: Boolean, newHeight: Float) {
+        if (isLeft) {
+            val centerY = leftPaddle.position.y + leftPaddle.size.height / 2
+            val newY = (centerY - newHeight / 2).coerceIn(0f, height - newHeight)
+            leftPaddle = leftPaddle.copy(
+                position = leftPaddle.position.copy(y = newY),
+                size = Size(paddleWidth, newHeight)
+            )
+        } else {
+            val centerY = rightPaddle.position.y + rightPaddle.size.height / 2
+            val newY = (centerY - newHeight / 2).coerceIn(0f, height - newHeight)
+            rightPaddle = rightPaddle.copy(
+                position = rightPaddle.position.copy(y = newY),
+                size = Size(paddleWidth, newHeight)
+            )
+        }
+    }
+
+    private fun deactivateEffect() {
+        val effect = activeEffect ?: return
+        when (effect.type) {
+            PowerUpType.WIDER_PADDLE, PowerUpType.PADDLE_SHRINK -> {
+                resizePaddle(effect.targetIsLeft, paddleHeight)
+            }
+            PowerUpType.MULTIBALL -> { /* balls reset by resetBall() */ }
+        }
+        activeEffect = null
+    }
+
+    private fun spawnExtraBalls(count: Int) {
+        val primary = balls.first()
+        val newBalls = (1..count).map { i ->
+            val angleOffset = if (i == 1) 0.5f else -0.5f
+            Ball(
+                position = primary.position,
+                velocity = Offset(
+                    primary.velocity.x,
+                    primary.velocity.y + primary.velocity.x * angleOffset
+                ),
+                radius = primary.radius
+            )
+        }
+        balls = balls + newBalls
+        ballTrails = ballTrails + newBalls.map { emptyList<Offset>() }
     }
 
     fun update(deltaTime: Long) {
         if (status != GameStatus.PLAYING) return
 
         gameTimeMs += deltaTime
-        ballTrail = (ballTrail + ball.position).takeLast(maxTrailSize)
 
-        val nextPos = ball.position + ball.velocity
-        ball = ball.copy(position = nextPos)
-
-        if (ball.position.y - ball.radius < 0) {
-            ball = ball.copy(
-                position = ball.position.copy(y = ball.radius),
-                velocity = ball.velocity.copy(y = -ball.velocity.y)
-            )
+        // Power-up cooldown/spawn
+        if (powerUpsEnabled && powerUp == null) {
+            powerUpCooldownMs -= deltaTime
+            if (powerUpCooldownMs <= 0) {
+                spawnPowerUp()
+            }
         }
-        if (ball.position.y + ball.radius > height) {
-            ball = ball.copy(
-                position = ball.position.copy(y = height - ball.radius),
-                velocity = ball.velocity.copy(y = -ball.velocity.y)
-            )
+
+        // Update trails
+        ballTrails = balls.mapIndexed { index, b ->
+            val trail = ballTrails.getOrElse(index) { emptyList() }
+            (trail + b.position).takeLast(maxTrailSize)
+        }
+
+        // Move all balls
+        balls = balls.map { b ->
+            b.copy(position = b.position + b.velocity)
+        }
+
+        // Wall bounces
+        balls = balls.map { b ->
+            var updated = b
+            if (updated.position.y - updated.radius < 0) {
+                updated = updated.copy(
+                    position = updated.position.copy(y = updated.radius),
+                    velocity = updated.velocity.copy(y = -updated.velocity.y)
+                )
+            }
+            if (updated.position.y + updated.radius > height) {
+                updated = updated.copy(
+                    position = updated.position.copy(y = height - updated.radius),
+                    velocity = updated.velocity.copy(y = -updated.velocity.y)
+                )
+            }
+            updated
         }
 
         updateObstacles()
-        checkObstacleCollisions()
 
-        checkPaddleCollision(leftPaddle)
-        checkPaddleCollision(rightPaddle)
+        // Obstacle collisions
+        balls = balls.map { b -> checkObstacleCollisionForBall(b) }
 
-        if (ball.position.x < 0) {
+        // Paddle collisions
+        balls = balls.map { b ->
+            var updated = checkPaddleCollisionForBall(b, leftPaddle, isLeft = true)
+            updated = checkPaddleCollisionForBall(updated, rightPaddle, isLeft = false)
+            updated
+        }
+
+        // Power-up collision
+        if (powerUpsEnabled) {
+            checkPowerUpCollision()
+        }
+
+        // Scoring: any ball exit -> score + full reset
+        val anyExitLeft = balls.any { it.position.x < 0 }
+        val anyExitRight = balls.any { it.position.x > width }
+
+        if (anyExitLeft) {
             cpuScore++
             resetBall()
-        }
-        if (ball.position.x > width) {
+        } else if (anyExitRight) {
             playerScore++
             resetBall()
         }
@@ -184,39 +346,91 @@ class GameEngine(
         }
     }
 
-    private fun checkPaddleCollision(paddle: Paddle) {
-        val ballRect = androidx.compose.ui.geometry.Rect(
-            ball.position.x - ball.radius,
-            ball.position.y - ball.radius,
-            ball.position.x + ball.radius,
-            ball.position.y + ball.radius
+    private fun checkPaddleCollisionForBall(b: Ball, paddle: Paddle, isLeft: Boolean): Ball {
+        val ballRect = Rect(
+            b.position.x - b.radius,
+            b.position.y - b.radius,
+            b.position.x + b.radius,
+            b.position.y + b.radius
         )
-        val paddleRect = androidx.compose.ui.geometry.Rect(
-            paddle.position,
-            paddle.size
-        )
+        val paddleRect = Rect(paddle.position, paddle.size)
 
         if (ballRect.overlaps(paddleRect)) {
-            ball = ball.copy(velocity = ball.velocity.copy(x = -ball.velocity.x))
+            lastTouch = if (isLeft) LastTouch.LEFT else LastTouch.RIGHT
 
-            val hitPoint = ball.position.y - (paddle.position.y + paddle.size.height / 2)
-            ball = ball.copy(velocity = ball.velocity.copy(y = ball.velocity.y + hitPoint * 0.1f))
-
-            ball = ball.copy(velocity = ball.velocity * 1.05f)
+            var updated = b.copy(velocity = b.velocity.copy(x = -b.velocity.x))
+            val hitPoint = b.position.y - (paddle.position.y + paddle.size.height / 2)
+            updated = updated.copy(velocity = updated.velocity.copy(y = updated.velocity.y + hitPoint * 0.1f))
+            updated = updated.copy(velocity = updated.velocity * 1.05f)
+            return updated
         }
+        return b
+    }
+
+    private fun checkObstacleCollisionForBall(b: Ball): Ball {
+        val ballRect = Rect(
+            b.position.x - b.radius,
+            b.position.y - b.radius,
+            b.position.x + b.radius,
+            b.position.y + b.radius
+        )
+
+        for (obstacle in obstacles) {
+            val obstacleRect = Rect(obstacle.position, obstacle.size)
+
+            if (ballRect.overlaps(obstacleRect)) {
+                val overlapLeft = (b.position.x + b.radius) - obstacle.position.x
+                val overlapRight = (obstacle.position.x + obstacle.size.width) - (b.position.x - b.radius)
+                val overlapTop = (b.position.y + b.radius) - obstacle.position.y
+                val overlapBottom = (obstacle.position.y + obstacle.size.height) - (b.position.y - b.radius)
+
+                val minOverlapX = min(overlapLeft, overlapRight)
+                val minOverlapY = min(overlapTop, overlapBottom)
+
+                var updated = b
+                if (minOverlapX < minOverlapY) {
+                    updated = updated.copy(velocity = updated.velocity.copy(x = -updated.velocity.x))
+                    updated = if (overlapLeft < overlapRight) {
+                        updated.copy(position = updated.position.copy(x = obstacle.position.x - updated.radius))
+                    } else {
+                        updated.copy(position = updated.position.copy(x = obstacle.position.x + obstacle.size.width + updated.radius))
+                    }
+                } else {
+                    updated = updated.copy(velocity = updated.velocity.copy(y = -updated.velocity.y))
+                    updated = if (overlapTop < overlapBottom) {
+                        updated.copy(position = updated.position.copy(y = obstacle.position.y - updated.radius))
+                    } else {
+                        updated.copy(position = updated.position.copy(y = obstacle.position.y + obstacle.size.height + updated.radius))
+                    }
+                }
+                return updated
+            }
+        }
+        return b
     }
 
     private fun updateCpuPaddle(paddle: Paddle, isRight: Boolean) {
-        val isIncoming = if (isRight) ball.velocity.x > 0 else ball.velocity.x < 0
+        // Track the closest incoming ball
+        val incomingBalls = balls.filter { b ->
+            if (isRight) b.velocity.x > 0 else b.velocity.x < 0
+        }
 
-        var targetY = height / 2
-        if (isIncoming) {
-             targetY = ball.position.y - paddle.size.height / 2
+        val targetBall = if (incomingBalls.isNotEmpty()) {
+            if (isRight) {
+                incomingBalls.maxByOrNull { it.position.x }
+            } else {
+                incomingBalls.minByOrNull { it.position.x }
+            }
+        } else null
+
+        val targetY = if (targetBall != null) {
+            targetBall.position.y - paddle.size.height / 2
+        } else {
+            height / 2
         }
 
         val currentY = paddle.position.y
         val lerpFactor = 0.1f * difficulty.speedFactor
-
         val newY = currentY + (targetY - currentY) * lerpFactor
 
         val newPos = paddle.position.copy(
@@ -271,51 +485,9 @@ class GameEngine(
         }
     }
 
-    private fun checkObstacleCollisions() {
-        val ballRect = androidx.compose.ui.geometry.Rect(
-            ball.position.x - ball.radius,
-            ball.position.y - ball.radius,
-            ball.position.x + ball.radius,
-            ball.position.y + ball.radius
-        )
-
-        for (obstacle in obstacles) {
-            val obstacleRect = androidx.compose.ui.geometry.Rect(
-                obstacle.position,
-                obstacle.size
-            )
-
-            if (ballRect.overlaps(obstacleRect)) {
-                val overlapLeft = (ball.position.x + ball.radius) - obstacle.position.x
-                val overlapRight = (obstacle.position.x + obstacle.size.width) - (ball.position.x - ball.radius)
-                val overlapTop = (ball.position.y + ball.radius) - obstacle.position.y
-                val overlapBottom = (obstacle.position.y + obstacle.size.height) - (ball.position.y - ball.radius)
-
-                val minOverlapX = min(overlapLeft, overlapRight)
-                val minOverlapY = min(overlapTop, overlapBottom)
-
-                if (minOverlapX < minOverlapY) {
-                    ball = ball.copy(velocity = ball.velocity.copy(x = -ball.velocity.x))
-                    if (overlapLeft < overlapRight) {
-                        ball = ball.copy(position = ball.position.copy(x = obstacle.position.x - ball.radius))
-                    } else {
-                        ball = ball.copy(position = ball.position.copy(x = obstacle.position.x + obstacle.size.width + ball.radius))
-                    }
-                } else {
-                    ball = ball.copy(velocity = ball.velocity.copy(y = -ball.velocity.y))
-                    if (overlapTop < overlapBottom) {
-                        ball = ball.copy(position = ball.position.copy(y = obstacle.position.y - ball.radius))
-                    } else {
-                        ball = ball.copy(position = ball.position.copy(y = obstacle.position.y + obstacle.size.height + ball.radius))
-                    }
-                }
-                break
-            }
-        }
-    }
-
     fun updatePaddle(y: Float, isLeftPaddle: Boolean) {
-        val clampY = (y - paddleHeight / 2).coerceIn(0f, height - paddleHeight)
+        val paddle = if (isLeftPaddle) leftPaddle else rightPaddle
+        val clampY = (y - paddle.size.height / 2).coerceIn(0f, height - paddle.size.height)
 
         if (isLeftPaddle) {
             leftPaddle = leftPaddle.copy(position = leftPaddle.position.copy(y = clampY))

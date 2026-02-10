@@ -22,9 +22,12 @@ import io.github.digitals01.battimuro.game.GameLevel
 import io.github.digitals01.battimuro.game.GameMode
 import io.github.digitals01.battimuro.game.GameStatus
 import io.github.digitals01.battimuro.game.PaddleStyle
+import io.github.digitals01.battimuro.rendering.drawActiveEffectIndicator
 import io.github.digitals01.battimuro.rendering.drawBall
 import io.github.digitals01.battimuro.rendering.drawObstacles
 import io.github.digitals01.battimuro.rendering.drawPaddle
+import io.github.digitals01.battimuro.rendering.drawPowerUp
+import androidx.compose.ui.text.rememberTextMeasurer
 import io.github.digitals01.battimuro.ui.theme.DarkBackground
 import io.github.digitals01.battimuro.ui.theme.NeonGreen
 
@@ -36,6 +39,7 @@ fun GameScreen(
     ballStyle: BallStyle,
     paddleStyle: PaddleStyle,
     gameLevel: GameLevel = GameLevel.NONE,
+    powerUpsEnabled: Boolean = false,
     onGameOver: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -64,7 +68,7 @@ fun GameScreen(
         val height = maxHeight.value * density
 
         val gameEngine = remember(width, height) {
-            GameEngine(width, height, gameMode, difficulty, playerIsLeft, gameLevel).apply { start() }
+            GameEngine(width, height, gameMode, difficulty, playerIsLeft, gameLevel, powerUpsEnabled).apply { start() }
         }
 
         LaunchedEffect(Unit) {
@@ -84,6 +88,8 @@ fun GameScreen(
             if (showMenu) gameEngine.pause() else gameEngine.resume()
         }
 
+        val textMeasurer = rememberTextMeasurer()
+
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -97,12 +103,16 @@ fun GameScreen(
                 pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(20f, 20f))
             )
 
-            drawBall(
-                ball = gameEngine.ball,
-                style = ballStyle,
-                trail = gameEngine.ballTrail,
-                gameTimeMs = gameEngine.gameTimeMs
-            )
+            // Draw all balls (multiball support)
+            gameEngine.balls.forEachIndexed { index, b ->
+                val trail = gameEngine.ballTrails.getOrElse(index) { emptyList() }
+                drawBall(
+                    ball = b,
+                    style = ballStyle,
+                    trail = trail,
+                    gameTimeMs = gameEngine.gameTimeMs
+                )
+            }
 
             drawPaddle(
                 leftPaddle = gameEngine.leftPaddle,
@@ -115,6 +125,21 @@ fun GameScreen(
                 obstacles = gameEngine.obstacles,
                 gameTimeMs = gameEngine.gameTimeMs
             )
+
+            // Draw power-up on field
+            gameEngine.powerUp?.let { pu ->
+                drawPowerUp(pu, gameEngine.gameTimeMs, textMeasurer)
+            }
+
+            // Draw active effect indicator on paddle
+            gameEngine.activeEffect?.let { effect ->
+                drawActiveEffectIndicator(
+                    effect,
+                    gameEngine.leftPaddle,
+                    gameEngine.rightPaddle,
+                    gameEngine.gameTimeMs
+                )
+            }
         }
 
         Row(Modifier.fillMaxSize()) {

@@ -15,6 +15,7 @@ class GooglePlayBillingManager(
         const val PRODUCT_STYLE_PACK = "style_pack"
         const val PRODUCT_LEVELS_PACK = "levels_pack"
         const val PRODUCT_DONATION = "donation"
+        const val PRODUCT_BONUS_PACK = "bonus_pack"
     }
 
     private var listener: BillingListener? = null
@@ -54,7 +55,7 @@ class GooglePlayBillingManager(
     private fun queryProductDetails() {
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(
-                listOf(PRODUCT_STYLE_PACK, PRODUCT_LEVELS_PACK, PRODUCT_DONATION).map { productId ->
+                listOf(PRODUCT_STYLE_PACK, PRODUCT_LEVELS_PACK, PRODUCT_DONATION, PRODUCT_BONUS_PACK).map { productId ->
                     QueryProductDetailsParams.Product.newBuilder()
                         .setProductId(productId)
                         .setProductType(BillingClient.ProductType.INAPP)
@@ -83,6 +84,10 @@ class GooglePlayBillingManager(
 
     override fun purchaseDonation(activity: Activity) {
         launchPurchase(activity, PRODUCT_DONATION)
+    }
+
+    override fun purchaseBonusPack(activity: Activity) {
+        launchPurchase(activity, PRODUCT_BONUS_PACK)
     }
 
     private fun launchPurchase(activity: Activity, productId: String) {
@@ -124,6 +129,12 @@ class GooglePlayBillingManager(
                 }
                 purchaseRepository.setLevelsPackPurchased(hasLevelsPack)
 
+                val hasBonusPack = purchases.any {
+                    it.products.contains(PRODUCT_BONUS_PACK) &&
+                            it.purchaseState == Purchase.PurchaseState.PURCHASED
+                }
+                purchaseRepository.setBonusPackPurchased(hasBonusPack)
+
                 purchases.filter {
                     it.purchaseState == Purchase.PurchaseState.PURCHASED && !it.isAcknowledged
                 }.forEach { purchase ->
@@ -145,6 +156,10 @@ class GooglePlayBillingManager(
                         if (purchase.products.contains(PRODUCT_LEVELS_PACK)) {
                             purchaseRepository.setLevelsPackPurchased(true)
                             listener?.onPurchaseComplete(PRODUCT_LEVELS_PACK, true)
+                        }
+                        if (purchase.products.contains(PRODUCT_BONUS_PACK)) {
+                            purchaseRepository.setBonusPackPurchased(true)
+                            listener?.onPurchaseComplete(PRODUCT_BONUS_PACK, true)
                         }
                         if (!purchase.isAcknowledged) {
                             acknowledgePurchase(purchase)
